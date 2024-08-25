@@ -145,6 +145,7 @@ class _RegisterscreenState extends State<Registerscreen> {
         child: ElevatedButton(
           onPressed: () {
             checkvalide();
+            Navigator.pushNamed(context, '/Login');
           },
           style: ElevatedButton.styleFrom(
               backgroundColor: spruce,

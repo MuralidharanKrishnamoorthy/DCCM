@@ -1,4 +1,5 @@
 import 'package:dccm/UserInterfaces/LaunchScreen.dart';
+import 'package:dccm/UserInterfaces/LoginScreen.dart';
 import 'package:dccm/UserInterfaces/RegisterScreen.dart';
 import 'package:flutter/material.dart';
 
@@ -18,6 +19,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => const LaunchScreen(),
         '/Registerscreen': (context) => const Registerscreen(),
+        '/Login': (context) => const Loginscreen()
       },
     );
   }
