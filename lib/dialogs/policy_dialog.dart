@@ -59,8 +59,7 @@ class PolicyDialog extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: spruce,
                   shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(10.0), // Adjust radius as needed
+                    borderRadius: BorderRadius.circular(10.0),
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                 ),
