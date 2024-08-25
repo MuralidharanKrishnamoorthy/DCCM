@@ -129,7 +129,7 @@ class _LoginscreenState extends State<Loginscreen> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20))),
                 child: Text(
-                  'Register',
+                  'Login',
                   style: GoogleFonts.poppins(color: linen),
                 ),
               ),
@@ -144,7 +144,7 @@ class _LoginscreenState extends State<Loginscreen> {
 
   PreferredSize _appbar() {
     return PreferredSize(
-      preferredSize: Size.fromHeight(1),
+      preferredSize: const Size.fromHeight(1),
       child: AppBar(
         backgroundColor: parchment,
       ),
