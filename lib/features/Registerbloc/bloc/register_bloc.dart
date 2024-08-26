@@ -1,5 +1,5 @@
 import 'package:bloc/bloc.dart';
-import 'package:meta/meta.dart';
+import 'package:equatable/equatable.dart';
 
 part 'register_event.dart';
 part 'register_state.dart';

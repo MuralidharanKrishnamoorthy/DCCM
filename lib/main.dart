@@ -12,7 +12,6 @@ void main() async {
     String? deviceid = await getdeviceinfo();
     print("device id , $deviceid");
   } catch (e) {
-    // ignore: avoid_print
     print("$e");
   }
 
