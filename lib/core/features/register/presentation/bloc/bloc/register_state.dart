@@ -21,8 +21,6 @@ class RegisterInitial extends RegisterState {
 
 class Regloadingstate extends RegisterState {}
 
-class Regvalidatestate extends RegisterState {}
-
 class Regsuccessstate extends RegisterState {}
 
 class Regfailedstate extends RegisterState {
@@ -35,5 +33,3 @@ class Regfailedstate extends RegisterState {
   @override
   List<Object?> get props => [emailcheck, passwordcheck, selectedrolecheck];
 }
-
-class Regloadaedstate extends RegisterState {}
