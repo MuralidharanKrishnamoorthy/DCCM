@@ -1,10 +1,11 @@
-// ignore_for_file: avoid_print
+import 'package:dccm/core/binding/binding.dart';
+import 'package:dccm/core/features/launch/presentation/pages/launchscreen.dart';
+import 'package:dccm/core/features/login/presentation/pages/loginscreen.dart';
+import 'package:dccm/core/features/register/presentation/bloc/bloc/register_bloc.dart';
 
-import 'package:dccm/UserInterfaces/LaunchScreen.dart';
-import 'package:dccm/UserInterfaces/LoginScreen.dart';
-import 'package:dccm/UserInterfaces/RegisterScreen.dart';
-import 'package:dccm/device_binding/device_binding.dart';
+import 'package:dccm/core/features/register/presentation/pages/registerscreen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,7 +16,9 @@ void main() async {
     print("$e");
   }
 
-  runApp(const MyApp());
+  runApp(MultiBlocProvider(providers: [
+    BlocProvider<RegisterBloc>(create: (context) => RegisterBloc())
+  ], child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
