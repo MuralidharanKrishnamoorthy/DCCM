@@ -4,6 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+// ignore: camel_case_types
 class terms_and_conditions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -69,6 +70,7 @@ class terms_and_conditions extends StatelessWidget {
   }
 }
 
+// ignore: camel_case_types
 class registerbutton extends StatelessWidget {
   const registerbutton({super.key, required this.onSubmit});
   final VoidCallback onSubmit;
@@ -98,6 +100,7 @@ class registerbutton extends StatelessWidget {
   }
 }
 
+// ignore: camel_case_types
 class roleselection extends StatelessWidget {
   const roleselection({super.key, this.selectedRole, required this.onChanged});
   final String? selectedRole;
@@ -146,6 +149,7 @@ class roleselection extends StatelessWidget {
   }
 }
 
+// ignore: camel_case_types
 class registerform extends StatelessWidget {
   const registerform(
       {super.key,
