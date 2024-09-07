@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "coinbase-commerce-node": "^1.0.4",
+    "ipfs-http-client": "^60.0.1"
+  }
+}
