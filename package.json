@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@circle-fin/circle-sdk": "^2.9.0",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "ethers": "^6.13.2",
