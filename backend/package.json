@@ -3,29 +3,10 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon app.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
-  "dependencies": {
-    "@babel/plugin-transform-class-properties": "^7.25.4",
-    "@babel/plugin-transform-nullish-coalescing-operator": "^7.24.7",
-    "@babel/plugin-transform-optional-chaining": "^7.24.8",
-    "@helia/cli": "^0.0.0",
-    "@helia/core": "^0.0.0",
-    "axios": "^1.7.7",
-    "body-parser": "^1.20.2",
-    "coinbase-commerce-node": "^1.0.4",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "ethers": "^6.13.2",
-    "express": "^4.19.2",
-    "ipfs-cli": "^0.16.1",
-    "mongoose": "^8.6.1",
-    "rimraf": "^6.0.1",
-    "uuid": "^10.0.0",
-    "web3": "^4.12.1"
-  }
+  "description": ""
 }
