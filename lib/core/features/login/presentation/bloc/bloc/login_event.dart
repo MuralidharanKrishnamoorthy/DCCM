@@ -14,12 +14,15 @@ class logininitialevent extends LoginEvent {}
 class loginbuttonclickedevent extends LoginEvent {
   final String emailvalidate;
   final String passwordvalidate;
+  final String deviceId;
 
   const loginbuttonclickedevent(
-      {required this.emailvalidate, required this.passwordvalidate});
+      {required this.emailvalidate,
+      required this.passwordvalidate,
+      required this.deviceId});
 
   @override
-  List<Object> get props => [emailvalidate, passwordvalidate];
+  List<Object> get props => [emailvalidate, passwordvalidate, deviceId];
 }
 
 class loginvalidateevent extends LoginEvent {}

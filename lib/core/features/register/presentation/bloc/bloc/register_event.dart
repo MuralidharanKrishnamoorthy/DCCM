@@ -13,8 +13,10 @@ class Regbuttonclickedevent extends RegisterEvent {
   final String email;
   final String password;
   final String? selectedRole;
+  final String? deviceId;
 
-  const Regbuttonclickedevent(this.email, this.password, this.selectedRole);
+  const Regbuttonclickedevent(
+      this.email, this.password, this.selectedRole, this.deviceId);
   @override
-  List<Object?> get props => [email, password, selectedRole];
+  List<Object?> get props => [email, password, selectedRole, deviceId];
 }

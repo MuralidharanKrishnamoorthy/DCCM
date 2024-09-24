@@ -17,6 +17,10 @@ const UserSchema = new mongoose.Schema
         required:true
 
     },
-    
+    deviceId: {
+        type: String,
+        required: true,
+        unique: true
+      }
 });
 module.exports = mongoose.model('usermodel', UserSchema);

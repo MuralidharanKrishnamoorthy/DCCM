@@ -13,7 +13,14 @@ final class LoginInitial extends LoginState {}
 
 class loginvalidatestate extends LoginState {}
 
-class loginsuccessstate extends LoginState {}
+class loginsuccessstate extends LoginState {
+  final String token;
+  final String role;
+
+  loginsuccessstate({required this.token, required this.role});
+  @override
+  List<Object> get props => [token, role];
+}
 
 class loginfailedstate extends LoginState {
   final String? emailvalidate;

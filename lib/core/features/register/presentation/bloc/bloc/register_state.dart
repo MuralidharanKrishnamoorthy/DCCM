@@ -21,7 +21,13 @@ class RegisterInitial extends RegisterState {
 
 class Regloadingstate extends RegisterState {}
 
-class Regsuccessstate extends RegisterState {}
+class Regsuccessstate extends RegisterState {
+  final String token;
+
+  const Regsuccessstate({required this.token});
+  @override
+  List<Object?> get props => [token];
+}
 
 class Regfailedstate extends RegisterState {
   final String? emailcheck;

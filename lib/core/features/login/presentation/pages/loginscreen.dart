@@ -14,6 +14,7 @@ class Loginscreen extends StatefulWidget {
 class _LoginscreenState extends State<Loginscreen> {
   var email = '';
   var password = '';
+  var deviceId = '';
   final _formkey = GlobalKey<FormState>();
   checkvalide() {
     if (_formkey.currentState!.validate()) {
@@ -45,6 +46,7 @@ class _LoginscreenState extends State<Loginscreen> {
                   .showSnackBar(SnackBar(content: Text(passwordvalidate)));
             }
           }
+          // need to add the correct routes for roles ****
           if (state is loginsuccessstate) {
             Navigator.pushReplacementNamed(context, '/login');
           }
@@ -79,7 +81,8 @@ class _LoginscreenState extends State<Loginscreen> {
                               context.read<LoginBloc>().add(
                                   loginbuttonclickedevent(
                                       emailvalidate: email,
-                                      passwordvalidate: password));
+                                      passwordvalidate: password,
+                                      deviceId: deviceId));
                             }
                           })
                     ],
