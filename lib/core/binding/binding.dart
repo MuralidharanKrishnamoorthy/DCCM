@@ -20,6 +20,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class DeviceBinding {
+  static const String baseUrl = 'http://10.0.13.158:8080/api/dccm';
   static Future<String?> getDeviceInfo() async {
     final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
     if (Platform.isAndroid) {
@@ -44,7 +45,7 @@ class DeviceBinding {
 
   static Future<bool> checkDeviceBinding(String deviceId) async {
     final response = await http.post(
-      Uri.parse('/check-device-binding'),
+      Uri.parse('$baseUrl/check-device-binding'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },

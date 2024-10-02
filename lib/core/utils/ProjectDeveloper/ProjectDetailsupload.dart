@@ -2,7 +2,10 @@
 
 import 'package:dccm/Colors.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart'; // Import Google Fonts package
+import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'package:http/http.dart' as http;
 
 class ProjectDetailsUpload extends StatefulWidget {
   const ProjectDetailsUpload({super.key});
@@ -13,12 +16,40 @@ class ProjectDetailsUpload extends StatefulWidget {
 
 class _ProjectDetailsUploadState extends State<ProjectDetailsUpload> {
   final TextEditingController _landSizeController = TextEditingController();
-  final TextEditingController _treeSpeciesController = TextEditingController();
   final TextEditingController _ageController = TextEditingController();
-  final TextEditingController _locationController = TextEditingController();
   final TextEditingController _issuerIdController = TextEditingController();
+  final TextEditingController _surveyIdController = TextEditingController();
+  final TextEditingController _countryController = TextEditingController();
+  final TextEditingController _stateController = TextEditingController();
+  final TextEditingController _pincodeController = TextEditingController();
+  final TextEditingController _landmarkController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _projectDetailsController =
+      TextEditingController();
 
-  String _landType = 'Forest'; // Default land type selection
+  String? _selectedTreeSpecies;
+
+  final List<String> treespecies = [
+    'Mangrove',
+    'Bamboo',
+    'Eucalyptus',
+    'Oak',
+    'Pine',
+    'Acacia',
+    'Palm',
+    'Birch',
+    'Cypress',
+    'Willow'
+  ];
+
+  File? _landImage;
+  File? _landPattaImage;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedTreeSpecies = treespecies.first;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,51 +79,56 @@ class _ProjectDetailsUploadState extends State<ProjectDetailsUpload> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Image upload section
-            Container(
-              width: double.infinity,
-              height: 200,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.cloud_upload,
-                        size: 40, color: Colors.grey),
-                    const SizedBox(height: 10),
-                    Text(
-                      'Upload Image',
-                      style: GoogleFonts.lato(
-                        textStyle: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ),
-                  ],
+            GestureDetector(
+              onTap: _pickLandImage,
+              child: Container(
+                width: double.infinity,
+                height: 200,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(12),
+                  image: _landImage != null
+                      ? DecorationImage(
+                          image: FileImage(_landImage!),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
                 ),
+                child: _landImage == null
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.cloud_upload,
+                                size: 40, color: Colors.grey),
+                            const SizedBox(height: 10),
+                            Text(
+                              'Upload Land Image',
+                              style: GoogleFonts.lato(
+                                textStyle: const TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : null,
               ),
             ),
+            const SizedBox(height: 20),
+
+            // Project Details field
+            ProjectDetails(),
             const SizedBox(height: 20),
 
             // Land size field
             Landsize(),
             const SizedBox(height: 20),
 
-            // Land type section
-            Text(
-              'Land Type',
-              style: GoogleFonts.lato(
-                textStyle: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-            ),
-            LandType(),
+            // Survey ID field
+            SurveyId(),
             const SizedBox(height: 20),
 
             // Tree species field
@@ -103,13 +139,29 @@ class _ProjectDetailsUploadState extends State<ProjectDetailsUpload> {
             TreeAge(),
             const SizedBox(height: 20),
 
-            // Location field
-            ProjectLocation(),
+            // Country field
+            Country(),
+            const SizedBox(height: 20),
+
+            // State field
+            State(),
+            const SizedBox(height: 20),
+
+            // Pincode field
+            Pincode(),
+            const SizedBox(height: 20),
+
+            // Landmark field
+            Landmark(),
+            const SizedBox(height: 20),
+
+            // Email field
+            Email(),
             const SizedBox(height: 20),
 
             // Upload document section
             Text(
-              'Upload Document:',
+              'Upload Land Patta Document:',
               style: GoogleFonts.lato(
                 textStyle: const TextStyle(
                   fontSize: 16,
@@ -120,6 +172,17 @@ class _ProjectDetailsUploadState extends State<ProjectDetailsUpload> {
             ),
             const SizedBox(height: 10),
             DocumentUpload(),
+            const SizedBox(height: 10),
+            if (_landPattaImage != null)
+              Text(
+                'Land Patta Image uploaded',
+                style: GoogleFonts.lato(
+                  textStyle: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.green,
+                  ),
+                ),
+              ),
             const SizedBox(height: 20),
 
             // Issuer ID/Contact Info
@@ -134,12 +197,80 @@ class _ProjectDetailsUploadState extends State<ProjectDetailsUpload> {
     );
   }
 
+  Future<void> _uploadProjectDetails() async {
+    if (_landImage == null || _landPattaImage == null) {
+      // Show an error message if images are not uploaded
+      return;
+    }
+
+    final request = http.MultipartRequest(
+      'POST',
+      Uri.parse('http://10.0.13.158:8080/api/dccm/projectdetail'),
+    );
+
+    request.fields['landSize'] = _landSizeController.text;
+    request.fields['treeAge'] = _ageController.text;
+    request.fields['issuerId'] = _issuerIdController.text;
+    request.fields['surveyId'] = _surveyIdController.text;
+    request.fields['country'] = _countryController.text;
+    request.fields['state'] = _stateController.text;
+    request.fields['pincode'] = _pincodeController.text;
+    request.fields['landmark'] = _landmarkController.text;
+    request.fields['email'] = _emailController.text;
+    request.fields['treeSpecies'] = _selectedTreeSpecies!;
+    request.fields['projectDetail'] = _projectDetailsController.text;
+
+    request.files.add(
+        await http.MultipartFile.fromPath('uploadedImages', _landImage!.path));
+    request.files.add(await http.MultipartFile.fromPath(
+        'landPattaImage', _landPattaImage!.path));
+
+    final response = await request.send();
+    if (response.statusCode == 201) {
+      // Successfully uploaded
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Project details uploaded successfully!')));
+    } else {
+      // Failed to upload
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to upload project details.')));
+    }
+  }
+
+  Future<void> _pickLandImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() {
+        _landImage = File(image.path);
+      });
+    }
+  }
+
+  TextFormField ProjectDetails() {
+    return TextFormField(
+      controller: _projectDetailsController,
+      decoration: InputDecoration(
+        labelText: 'Project Details',
+        labelStyle: GoogleFonts.lato(
+          textStyle: const TextStyle(
+            color: Colors.black,
+            fontSize: 16,
+          ),
+        ),
+        border: const OutlineInputBorder(),
+      ),
+      maxLines: 5, // Allow multiple lines for detailed information
+    );
+  }
+
   SizedBox Submit() {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
         onPressed: () {
           // Submit action
+          _uploadProjectDetails();
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: forest,
@@ -180,13 +311,20 @@ class _ProjectDetailsUploadState extends State<ProjectDetailsUpload> {
 
   ElevatedButton DocumentUpload() {
     return ElevatedButton.icon(
-      onPressed: () {
-        // Document upload functionality
+      onPressed: () async {
+        final ImagePicker picker = ImagePicker();
+        final XFile? image =
+            await picker.pickImage(source: ImageSource.gallery);
+        if (image != null) {
+          setState(() {
+            _landPattaImage = File(image.path);
+          });
+        }
       },
       icon: const Icon(Icons.cloud_upload_outlined),
       label: Text(
-        'Browse',
-        style: GoogleFonts.lato(fontSize: 16),
+        'Upload Land Patta',
+        style: GoogleFonts.lato(fontSize: 16, color: parchment),
       ),
       style: ElevatedButton.styleFrom(
         backgroundColor: spruce,
@@ -194,22 +332,6 @@ class _ProjectDetailsUploadState extends State<ProjectDetailsUpload> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
-      ),
-    );
-  }
-
-  TextFormField ProjectLocation() {
-    return TextFormField(
-      controller: _locationController,
-      decoration: InputDecoration(
-        labelText: 'Location of the Project',
-        labelStyle: GoogleFonts.lato(
-          textStyle: const TextStyle(
-            color: Colors.black,
-            fontSize: 16,
-          ),
-        ),
-        border: const OutlineInputBorder(),
       ),
     );
   }
@@ -231,11 +353,11 @@ class _ProjectDetailsUploadState extends State<ProjectDetailsUpload> {
     );
   }
 
-  TextFormField TreeSpecies() {
-    return TextFormField(
-      controller: _treeSpeciesController,
+  Widget TreeSpecies() {
+    return DropdownButtonFormField<String>(
+      value: _selectedTreeSpecies,
       decoration: InputDecoration(
-        labelText: 'Tree Species (e.g. oak, pine)',
+        labelText: 'Tree Species',
         labelStyle: GoogleFonts.lato(
           textStyle: const TextStyle(
             color: Colors.black,
@@ -244,52 +366,33 @@ class _ProjectDetailsUploadState extends State<ProjectDetailsUpload> {
         ),
         border: const OutlineInputBorder(),
       ),
+      items: treespecies.map<DropdownMenuItem<String>>((species) {
+        return DropdownMenuItem<String>(
+          value: species,
+          child: Text(species),
+        );
+      }).toList(),
+      onChanged: (String? newValue) {
+        setState(() {
+          _selectedTreeSpecies = newValue;
+        });
+      },
     );
   }
 
-  Column LandType() {
-    return Column(
-      children: [
-        RadioListTile(
-          title: Text(
-            'Forest',
-            style: GoogleFonts.lato(fontSize: 14),
+  TextFormField SurveyId() {
+    return TextFormField(
+      controller: _surveyIdController,
+      decoration: InputDecoration(
+        labelText: 'Survey ID',
+        labelStyle: GoogleFonts.lato(
+          textStyle: const TextStyle(
+            color: Colors.black,
+            fontSize: 16,
           ),
-          value: 'Forest',
-          groupValue: _landType,
-          onChanged: (value) {
-            setState(() {
-              _landType = value.toString();
-            });
-          },
         ),
-        RadioListTile(
-          title: Text(
-            'Agricultural',
-            style: GoogleFonts.lato(fontSize: 14),
-          ),
-          value: 'Agricultural',
-          groupValue: _landType,
-          onChanged: (value) {
-            setState(() {
-              _landType = value.toString();
-            });
-          },
-        ),
-        RadioListTile(
-          title: Text(
-            'Barren',
-            style: GoogleFonts.lato(fontSize: 14),
-          ),
-          value: 'Barren',
-          groupValue: _landType,
-          onChanged: (value) {
-            setState(() {
-              _landType = value.toString();
-            });
-          },
-        ),
-      ],
+        border: const OutlineInputBorder(),
+      ),
     );
   }
 
@@ -306,6 +409,89 @@ class _ProjectDetailsUploadState extends State<ProjectDetailsUpload> {
         ),
         border: const OutlineInputBorder(),
       ),
+      keyboardType: TextInputType.number,
+    );
+  }
+
+  TextFormField Country() {
+    return TextFormField(
+      controller: _countryController,
+      decoration: InputDecoration(
+        labelText: 'Country',
+        labelStyle: GoogleFonts.lato(
+          textStyle: const TextStyle(
+            color: Colors.black,
+            fontSize: 16,
+          ),
+        ),
+        border: const OutlineInputBorder(),
+      ),
+    );
+  }
+
+  TextFormField State() {
+    return TextFormField(
+      controller: _stateController,
+      decoration: InputDecoration(
+        labelText: 'State',
+        labelStyle: GoogleFonts.lato(
+          textStyle: const TextStyle(
+            color: Colors.black,
+            fontSize: 16,
+          ),
+        ),
+        border: const OutlineInputBorder(),
+      ),
+    );
+  }
+
+  TextFormField Pincode() {
+    return TextFormField(
+      controller: _pincodeController,
+      decoration: InputDecoration(
+        labelText: 'Pincode',
+        labelStyle: GoogleFonts.lato(
+          textStyle: const TextStyle(
+            color: Colors.black,
+            fontSize: 16,
+          ),
+        ),
+        border: const OutlineInputBorder(),
+      ),
+      keyboardType: TextInputType.number,
+    );
+  }
+
+  TextFormField Landmark() {
+    return TextFormField(
+      controller: _landmarkController,
+      decoration: InputDecoration(
+        labelText: 'Landmark',
+        labelStyle: GoogleFonts.lato(
+          textStyle: const TextStyle(
+            color: Colors.black,
+            fontSize: 16,
+          ),
+        ),
+        border: const OutlineInputBorder(),
+      ),
+    );
+  }
+
+  TextFormField Email() {
+    return TextFormField(
+      controller: _emailController,
+      decoration: InputDecoration(
+        labelText: 'Email',
+        labelStyle: GoogleFonts.lato(
+          textStyle: const TextStyle(
+            color: Colors.black,
+            fontSize: 16,
+          ),
+        ),
+        border: const OutlineInputBorder(),
+      ),
+      keyboardType: TextInputType.emailAddress,
     );
   }
 }

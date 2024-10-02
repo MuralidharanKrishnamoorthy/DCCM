@@ -1,4 +1,8 @@
 import 'package:dccm/Colors.dart';
+import 'package:dccm/core/utils/Company/Dashboard.dart';
+import 'package:dccm/core/utils/Company/Marketplace.dart';
+import 'package:dccm/core/utils/Company/Payments.dart';
+import 'package:dccm/core/utils/Company/Profile.dart';
 import 'package:flutter/material.dart';
 
 class CompanyNavigation extends StatefulWidget {
@@ -10,7 +14,12 @@ class CompanyNavigation extends StatefulWidget {
 
 class _CompanyNavigationState extends State<CompanyNavigation> {
   int currentindex = 0;
-  final List<Widget> screens = [];
+  final List<Widget> screens = const [
+    CompanyDashboard(),
+    CompanyMarketplace(),
+    CompanyPayments(),
+    CompanyProfile()
+  ];
   void ontapped(int index) {
     setState(() {
       currentindex = index;

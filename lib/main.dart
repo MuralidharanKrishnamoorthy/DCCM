@@ -44,6 +44,8 @@ import 'package:dccm/core/features/login/presentation/bloc/bloc/login_bloc.dart'
 import 'package:dccm/core/features/register/data/datasource.dart'
     as registerdatasource;
 import 'package:dccm/core/features/register/presentation/bloc/bloc/register_bloc.dart';
+import 'package:dccm/core/utils/Company/CompanyNavigation.dart';
+import 'package:dccm/core/utils/ProjectDeveloper/ProjectDeveloperNavigate.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dccm/core/features/launch/presentation/pages/launchscreen.dart';
@@ -62,8 +64,8 @@ void main() {
         BlocProvider<DevicebindingBloc>(
             create: (context) => DevicebindingBloc()),
         BlocProvider<LoginBloc>(
-            create: (context) =>
-                LoginBloc(logindatasource.AuthRepository(baseUrl: '')))
+            create: (context) => LoginBloc(logindatasource.AuthRepository(
+                baseUrl: 'http://10.0.13.158:8080/api/dccm')))
       ],
       child: MyApp(),
     ),
@@ -97,9 +99,11 @@ class MyApp extends StatelessWidget {
         },
       ),
       routes: {
-        '/': (context) => LaunchScreen(),
+        //'/': (context) => LaunchScreen(),
         '/Registerscreen': (context) => Registerscreen(),
-        '/Login': (context) => Loginscreen()
+        '/Login': (context) => Loginscreen(),
+        '/Company': (context) => CompanyNavigation(),
+        '/Projectdeveloper': (context) => Projectdevnavigation()
       },
     );
   }

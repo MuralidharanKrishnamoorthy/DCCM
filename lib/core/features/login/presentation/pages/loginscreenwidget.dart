@@ -71,11 +71,12 @@ class loginform extends StatelessWidget {
                         borderSide: BorderSide(color: spruce, width: 2))),
                 key: const ValueKey('password'),
                 validator: (value) {
-                  if (value.toString().length <= 5) {
-                    return ' password length must be atleast 6 characters ';
-                  } else {
-                    return null;
+                  if (value.toString().isEmpty) {
+                    return 'Enter your password'; // Ensure this matches BLoC logic
+                  } else if (value!.length < 8) {
+                    return 'Password length must be at least 8';
                   }
+                  return null;
                 },
                 onChanged: onChangedPassword),
           ),
@@ -86,7 +87,7 @@ class loginform extends StatelessWidget {
               padding: const EdgeInsets.only(top: 15),
               child: ElevatedButton(
                 onPressed: () {
-                  onSubmit;
+                  onSubmit();
                   //  Navigator.pushNamed(context, '/Login');
                 },
                 style: ElevatedButton.styleFrom(

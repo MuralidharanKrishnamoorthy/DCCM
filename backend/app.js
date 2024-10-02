@@ -9,7 +9,7 @@ const mongoose = require('mongoose')
 
 const routes = require('./routes/authenticationroutes');
 
-const PORT = 8000;
+const PORT = 8080;
 // middleware
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
@@ -27,7 +27,8 @@ mongoose.connect(process.env.db_url)
 
 
 // server listening 
-app.listen(PORT, 'localhost', () => {
-    console.log(`server connected http://localhost:${PORT}`);
+app.listen(PORT, '10.0.13.158', () => {
+    //server need to change//
+    console.log(`server connected http://10.0.13.158:${PORT}`);
 });
 
