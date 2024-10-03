@@ -14,8 +14,8 @@ class Projectdevnavigation extends StatefulWidget {
 class _ProjectdevnavigationState extends State<Projectdevnavigation> {
   int currntindex = 0;
   final List<Widget> screens = [
-    Projectdevdashboard(),
-    ProjectDetailsUpload(),
+    const Projectdevdashboard(),
+    const ProjectDetailsUpload(),
     Projectstatus()
   ];
   void ontaped(int index) {
@@ -32,13 +32,14 @@ class _ProjectdevnavigationState extends State<Projectdevnavigation> {
         children: screens,
       ),
       bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: spruce,
         selectedItemColor: forest,
         unselectedItemColor: parchment,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
           BottomNavigationBarItem(
               icon: Icon(Icons.upload), label: "Details Upload"),
-          BottomNavigationBarItem(icon: Icon(Icons.wallet), label: "Payment")
+          BottomNavigationBarItem(icon: Icon(Icons.verified), label: "Status")
         ],
         currentIndex: currntindex,
         onTap: ontaped,

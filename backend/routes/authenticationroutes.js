@@ -114,6 +114,8 @@ routes.post('/projectdetail', upload.fields([{ name: 'uploadedImages' }, { name:
         email,
         issuerId,
         projectDetail,
+        landownername,
+        metamaskid
     } = req.body;
 
     // Ensure correct data types
@@ -132,7 +134,9 @@ routes.post('/projectdetail', upload.fields([{ name: 'uploadedImages' }, { name:
         !landmark || 
         !email || 
         !issuerId || 
-        !projectDetail
+        !projectDetail ||
+        !landownername||
+        !metamaskid
     ) {
         return res.status(400).json({ error: 'All fields must be filled correctly, and at least one image must be uploaded.' });
     }
@@ -161,6 +165,8 @@ routes.post('/projectdetail', upload.fields([{ name: 'uploadedImages' }, { name:
             issuerId,
             landPattaImage,
             projectDetail,
+            landownername,
+            metamaskid,
             uploadedImages: req.files['uploadedImages'].map(file => file.path), // Ensure you're storing the correct field
         });
 

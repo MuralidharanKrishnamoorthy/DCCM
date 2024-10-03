@@ -1,11 +1,13 @@
 // ignore_for_file: non_constant_identifier_names
 
 import 'package:dccm/Colors.dart';
+import 'package:dccm/core/utils/ProjectDeveloper/data/sucsessdialog.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+//import 'package:dccm/core/utils/ProjectDeveloper/data/datasource.dart';
 
 class ProjectDetailsUpload extends StatefulWidget {
   const ProjectDetailsUpload({super.key});
@@ -26,6 +28,9 @@ class _ProjectDetailsUploadState extends State<ProjectDetailsUpload> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _projectDetailsController =
       TextEditingController();
+  final TextEditingController _landownernameController =
+      TextEditingController();
+  final TextEditingController _metamaskidController = TextEditingController();
 
   String? _selectedTreeSpecies;
 
@@ -118,7 +123,8 @@ class _ProjectDetailsUploadState extends State<ProjectDetailsUpload> {
               ),
             ),
             const SizedBox(height: 20),
-
+            Landownername(),
+            const SizedBox(height: 20),
             // Project Details field
             ProjectDetails(),
             const SizedBox(height: 20),
@@ -188,7 +194,8 @@ class _ProjectDetailsUploadState extends State<ProjectDetailsUpload> {
             // Issuer ID/Contact Info
             IssuerID(),
             const SizedBox(height: 20),
-
+            Metamaskwalletid(),
+            const SizedBox(height: 20),
             // Submit button
             Submit(),
           ],
@@ -200,40 +207,66 @@ class _ProjectDetailsUploadState extends State<ProjectDetailsUpload> {
   Future<void> _uploadProjectDetails() async {
     if (_landImage == null || _landPattaImage == null) {
       // Show an error message if images are not uploaded
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Please upload both Land Image and Land Patta Document'),
+      ));
       return;
     }
 
-    final request = http.MultipartRequest(
-      'POST',
-      Uri.parse('http://10.0.13.158:8080/api/dccm/projectdetail'),
-    );
+    try {
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse('http://192.168.137.117:8080/api/dccm/projectdetail'),
+      );
 
-    request.fields['landSize'] = _landSizeController.text;
-    request.fields['treeAge'] = _ageController.text;
-    request.fields['issuerId'] = _issuerIdController.text;
-    request.fields['surveyId'] = _surveyIdController.text;
-    request.fields['country'] = _countryController.text;
-    request.fields['state'] = _stateController.text;
-    request.fields['pincode'] = _pincodeController.text;
-    request.fields['landmark'] = _landmarkController.text;
-    request.fields['email'] = _emailController.text;
-    request.fields['treeSpecies'] = _selectedTreeSpecies!;
-    request.fields['projectDetail'] = _projectDetailsController.text;
+      request.fields['landSize'] = _landSizeController.text;
+      request.fields['treeAge'] = _ageController.text;
+      request.fields['issuerId'] = _issuerIdController.text;
+      request.fields['surveyId'] = _surveyIdController.text;
+      request.fields['country'] = _countryController.text;
+      request.fields['state'] = _stateController.text;
+      request.fields['pincode'] = _pincodeController.text;
+      request.fields['landmark'] = _landmarkController.text;
+      request.fields['email'] = _emailController.text;
+      request.fields['treeSpecies'] = _selectedTreeSpecies!;
+      request.fields['projectDetail'] = _projectDetailsController.text;
+      request.fields['landownername'] = _landownernameController.text;
+      request.fields['metamaskid'] = _metamaskidController.text;
 
-    request.files.add(
-        await http.MultipartFile.fromPath('uploadedImages', _landImage!.path));
-    request.files.add(await http.MultipartFile.fromPath(
-        'landPattaImage', _landPattaImage!.path));
+      // Add land image
+      request.files.add(await http.MultipartFile.fromPath(
+        'uploadedImages',
+        _landImage!.path,
+      ));
 
-    final response = await request.send();
-    if (response.statusCode == 201) {
-      // Successfully uploaded
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Project details uploaded successfully!')));
-    } else {
-      // Failed to upload
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to upload project details.')));
+      // Add land patta image
+      request.files.add(await http.MultipartFile.fromPath(
+        'landPattaImage',
+        _landPattaImage!.path,
+      ));
+
+      // Send the request
+      final response = await request.send();
+      //final responseBody = await response.stream.bytesToString();
+      // print('Response status: ${response.statusCode}');
+      // print('Response body: $responseBody');
+
+      if (response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Project details uploaded successfully!'),
+        ));
+        // ignore: use_build_context_synchronously
+        showSuccessDialog(context);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(
+              'Failed to upload project details. Status: ${response.statusCode}'),
+        ));
+      }
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('An error occurred: $error'),
+      ));
     }
   }
 
@@ -298,6 +331,38 @@ class _ProjectDetailsUploadState extends State<ProjectDetailsUpload> {
       controller: _issuerIdController,
       decoration: InputDecoration(
         labelText: 'Issuer ID/Contact Info',
+        labelStyle: GoogleFonts.lato(
+          textStyle: const TextStyle(
+            color: Colors.black,
+            fontSize: 16,
+          ),
+        ),
+        border: const OutlineInputBorder(),
+      ),
+    );
+  }
+
+  TextFormField Metamaskwalletid() {
+    return TextFormField(
+      controller: _metamaskidController,
+      decoration: InputDecoration(
+        labelText: 'Metamask Wallet ID ',
+        labelStyle: GoogleFonts.lato(
+          textStyle: const TextStyle(
+            color: Colors.black,
+            fontSize: 16,
+          ),
+        ),
+        border: const OutlineInputBorder(),
+      ),
+    );
+  }
+
+  TextFormField Landownername() {
+    return TextFormField(
+      controller: _landownernameController,
+      decoration: InputDecoration(
+        labelText: 'Landowner Name',
         labelStyle: GoogleFonts.lato(
           textStyle: const TextStyle(
             color: Colors.black,

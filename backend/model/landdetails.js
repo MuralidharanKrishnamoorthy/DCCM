@@ -58,7 +58,7 @@ const projectSchema = new mongoose.Schema({
     type: String, 
     required: true
   },
-  uploadedImages: { 
+  uploadedImages: {
     type: [String],
     required: true
   },
@@ -66,6 +66,14 @@ const projectSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  landownername:{
+    type:String,
+    required:true
+  },
+  metamaskid:{
+    type:String,
+    required:true
+  }
 }, { timestamps: true });
 
 const Project = mongoose.model('Project', projectSchema);

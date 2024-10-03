@@ -65,7 +65,7 @@ void main() {
             create: (context) => DevicebindingBloc()),
         BlocProvider<LoginBloc>(
             create: (context) => LoginBloc(logindatasource.AuthRepository(
-                baseUrl: 'http://10.0.13.158:8080/api/dccm')))
+                baseUrl: 'http://192.168.137.117:8080/api/dccm')))
       ],
       child: MyApp(),
     ),

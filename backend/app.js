@@ -27,8 +27,8 @@ mongoose.connect(process.env.db_url)
 
 
 // server listening 
-app.listen(PORT, '10.0.13.158', () => {
+app.listen(PORT, '192.168.137.117', () => {
     //server need to change//
-    console.log(`server connected http://10.0.13.158:${PORT}`);
+    console.log(`server connected http://192.168.137.117:${PORT}`);
 });
 
