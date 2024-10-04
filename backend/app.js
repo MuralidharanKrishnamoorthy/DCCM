@@ -13,7 +13,7 @@ const path = require('path');
 
 const routes = require('./routes/authenticationroutes');
 
-const PORT = 8000;
+const PORT = 8080;
 // middleware
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
@@ -47,13 +47,17 @@ app.post('/api/predict', (req, res) => {
 
 // db connect
 mongoose.connect(process.env.db_url)
+
     .then(() => console.log(" database connected"))
     .catch((error) => console.error("failed to connect ", error));
+    
+
+
 
 
 // server listening 
-app.listen(PORT, '192.168.137.231', () => {
+app.listen(PORT, '172.168.72.240', () => {
     //server need to change//
-    console.log(`server connected http://192.168.137.231:${PORT}`);
+    console.log(`server connected http://172.168.72.240:${PORT}`);
 });
 

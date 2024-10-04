@@ -1,4 +1,4 @@
-﻿species,age,acres,credit_points
+﻿treeSpecies,treeAge,landSize,credit_points
 Mangrove,15,20,1500
 Mangrove,30,50,3000
 Mangrove,45,100,5500

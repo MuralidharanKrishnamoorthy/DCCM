@@ -73,6 +73,14 @@ const projectSchema = new mongoose.Schema({
   metamaskid:{
     type:String,
     required:true
+  },
+  verified: {
+    type: Boolean,
+    default: false
+  },
+  creditPoints: {
+    type: Number,
+    default: 0
   }
 }, { timestamps: true });
 

@@ -5,8 +5,11 @@ const bcrypt = require("bcrypt");
 const ProjectDetails = require('../model/landdetails');
 const jwt = require("jsonwebtoken");
 const { validateRegister, validateLogin } = require('../validation');
-const multer = require("multer")
+const multer = require("multer");
+const { spawn } = require('child_process');
+const path = require('path');
 
+// Multer Storage Setup
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, 'uploads/'); 
@@ -60,8 +63,7 @@ routes.post('/register', async (req, res) => {
             deviceId: req.body.deviceId // Add deviceId to the user model
         });
         const saveuser = await newuser.save();
-       // const sendtoken = jwt.sign({ _id: saveuser._id,role:user.Role,deviceId:user.deviceId }, process.env.secretkey, { expiresIn: "20d" });
-       const sendtoken = jwt.sign({ _id: saveuser._id, role: saveuser.Role, deviceId: saveuser.deviceId }, process.env.secretkey, { expiresIn: "20d" });
+        const sendtoken = jwt.sign({ _id: saveuser._id, role: saveuser.Role, deviceId: saveuser.deviceId }, process.env.secretkey, { expiresIn: "20d" });
 
         res.header('auth-token', sendtoken).json({ status: 'success', token: sendtoken });
     }
@@ -87,21 +89,24 @@ routes.post('/login', async (req, res) => {
             return res.status(400).json({ message: 'Invalid password' });
         }
 
-        
         if (user.deviceId !== req.body.deviceId) {
             return res.status(400).json({ message: 'Device not bound to this account' });
         }
 
-        const sendtoken = jwt.sign({ _id: user._id,role:user.Role,deviceId:user.deviceId }, process.env.secretkey, { expiresIn: '20d' });
-        res.header('auth-token', sendtoken).json({ status: 'success', token: sendtoken , role:user.Role});
+        // Added deviceId in response 
+        const sendtoken = jwt.sign({ _id: user._id, role: user.Role, deviceId: user.deviceId }, process.env.secretkey, { expiresIn: '20d' });
+        res.header('auth-token', sendtoken).json({ status: 'success', token: sendtoken, role: user.Role, deviceId: user.deviceId });
     } catch (error) {
         res.status(400).json({ message: 'Login failed', error: error.message });
-
     }
 });
 
-
+// Project Details Upload API
 routes.post('/projectdetail', upload.fields([{ name: 'uploadedImages' }, { name: 'landPattaImage' }]), async (req, res) => {
+    if (!req.files || !req.files['landPattaImage'] || !req.files['uploadedImages']) {
+        return res.status(400).json({ error: 'Image uploads failed or missing required files.' });
+    }
+
     const {
         landSize,
         surveyId,
@@ -118,11 +123,9 @@ routes.post('/projectdetail', upload.fields([{ name: 'uploadedImages' }, { name:
         metamaskid
     } = req.body;
 
-    // Ensure correct data types
     const parsedLandSize = parseFloat(landSize);
     const parsedTreeAge = parseInt(treeAge);
 
-    // Validate required fields
     if (
         !parsedLandSize || 
         !surveyId || 
@@ -135,23 +138,18 @@ routes.post('/projectdetail', upload.fields([{ name: 'uploadedImages' }, { name:
         !email || 
         !issuerId || 
         !projectDetail ||
-        !landownername||
+        !landownername ||
         !metamaskid
     ) {
         return res.status(400).json({ error: 'All fields must be filled correctly, and at least one image must be uploaded.' });
     }
 
-    // Check for at least one image
-    const landPattaImage = req.files['landPattaImage'] ? req.files['landPattaImage'][0].path : null;
-    if (!landPattaImage) {
-        return res.status(400).json({ error: 'Land Patta Image is required.' });
-    }
+    const landPattaImage = req.files['landPattaImage'][0].path;
 
-    if (!req.files['uploadedImages'] || req.files['uploadedImages'].length === 0) {
-        return res.status(400).json({ error: 'At least one image must be uploaded.' });
-    }
+    const uploadedImages = req.files['uploadedImages'].map(file => file.path);
 
     try {
+        // Initialize project details
         const projectDetails = new ProjectDetails({
             landSize: parsedLandSize,
             surveyId,
@@ -167,16 +165,68 @@ routes.post('/projectdetail', upload.fields([{ name: 'uploadedImages' }, { name:
             projectDetail,
             landownername,
             metamaskid,
-            uploadedImages: req.files['uploadedImages'].map(file => file.path), // Ensure you're storing the correct field
+            uploadedImages, 
+            verified: false,
+            creditPoints: 0
         });
 
-        await projectDetails.save();
-        res.status(201).json(projectDetails);
+        // AI model 
+        const pythonScriptPath = path.join(__dirname, '..', 'node_server', 'python_model', 'predict.py');
+        const pythonProcess = spawn('python', [pythonScriptPath, treeSpecies, treeAge.toString(), landSize.toString()]);
+
+        pythonProcess.stdout.on('data', async (data) => {
+            const predictedCredits = parseFloat(data.toString().trim());
+            console.log("Predicted Credits:", predictedCredits); 
+
+            if (isNaN(predictedCredits)) {
+                console.error('Invalid response from AI model');
+                return res.status(500).json({ error: 'Invalid response from AI model' });
+            }
+            
+            try {
+                await ProjectDetails.findByIdAndUpdate(projectDetails._id, {
+                    creditPoints: predictedCredits,
+                    verified: true
+                });
+                // Save the project details after prediction
+                await projectDetails.save();
+                console.log("Project saved successfully"); // Debugging statement
+                // Send response
+                res.status(201).json(projectDetails);
+            } catch (error) {
+                console.error("Failed to save project with AI result:", error);
+                res.status(500).json({ error: 'Failed to save project with AI result' });
+            }
+        });
+
+        pythonProcess.stderr.on('data', (data) => {
+            console.error(`Error in Python script: ${data}`);
+            if (!res.headersSent) { // Only send response if not already sent
+                res.status(500).json({ error: 'Error in AI verification process' });
+            }
+        });
+
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        console.error("Error in project detail upload:", error);
+        if (!res.headersSent) { // Ensure headers are sent only once
+            res.status(500).json({ error: error.message });
+        }
     }
 });
 
-
+// Fetch Projects for the Given Device ID API
+routes.get('/projects/:deviceId', async (req, res) => {
+    try {
+        const { deviceId } = req.params;
+        const user = await usermodel.findOne({ deviceId });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        const projects = await ProjectDetails.find({ email: user.Email }).sort({ createdAt: -1 });
+        res.json(projects);
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching projects", error: error.message });
+    }
+});
 
 module.exports = routes;
