@@ -87,6 +87,7 @@ The **DCCM app** operates with two distinct roles: **land owners** and **compani
 ### Backend:
 
 - **AI Model**: Inside the `backend` folder, there's a folder named `node server`, which contains a subfolder `python_model` where the AI-related code is integrated.
+- **Blockchain**: Inside the `backend` folder, there is a folder named `contracts` which contains the Blockchain related code.
 - **API & Server**: The APIs for the app are located in the `routes/authroutes` folder, and the `app.js` file contains the server connection and database connection logic.
 
 ### Frontend:
