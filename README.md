@@ -1,4 +1,4 @@
-# dccm
+# decentralized carbon credit marketplace
 
 A new Flutter project.
 
