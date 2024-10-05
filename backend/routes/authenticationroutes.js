@@ -169,6 +169,7 @@ routes.post('/projectdetail', upload.fields([{ name: 'uploadedImages' }, { name:
             verified: false,
             creditPoints: 0
         });
+        const savedProject = await projectDetails.save();
 
         // AI model 
         const pythonScriptPath = path.join(__dirname, '..', 'node_server', 'python_model', 'predict.py');
@@ -184,15 +185,22 @@ routes.post('/projectdetail', upload.fields([{ name: 'uploadedImages' }, { name:
             }
             
             try {
-                await ProjectDetails.findByIdAndUpdate(projectDetails._id, {
+                // await ProjectDetails.findByIdAndUpdate(projectDetails._id, {
+                //     creditPoints: predictedCredits,
+                //     verified: true
+                // });
+                // // Save the project details after prediction
+                // await projectDetails.save();
+                // console.log("Project saved successfully"); // Debugging statement
+                // // Send response
+                // res.status(201).json(projectDetails);
+                await ProjectDetails.findByIdAndUpdate(savedProject._id, {
                     creditPoints: predictedCredits,
                     verified: true
-                });
-                // Save the project details after prediction
-                await projectDetails.save();
-                console.log("Project saved successfully"); // Debugging statement
-                // Send response
-                res.status(201).json(projectDetails);
+                }, { new: true }); // Optionally use { new: true } to return the updated document
+
+                console.log("Project updated with credits and verification");
+                res.status(201).json({ message: "Project saved and updated with AI result", projectId: savedProject._id });
             } catch (error) {
                 console.error("Failed to save project with AI result:", error);
                 res.status(500).json({ error: 'Failed to save project with AI result' });

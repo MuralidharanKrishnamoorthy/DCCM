@@ -48,7 +48,7 @@ class _ProjectStatusState extends State<ProjectStatus>
   late Timer _timer;
   bool _isLoading = true;
   final AuthRepository authRepository =
-      AuthRepository(baseUrl: 'http://172.168.72.240:8080/api/dccm');
+      AuthRepository(baseUrl: 'http://192.168.41.122:8080/api/dccm');
 
   @override
   void initState() {

@@ -10,6 +10,6 @@ class CompanyProfile extends StatefulWidget {
 class _CompanyProfileState extends State<CompanyProfile> {
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Scaffold();
   }
 }

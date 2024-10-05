@@ -1,4 +1,3 @@
-
 require('dotenv').config()
 
 const express = require('express');
@@ -24,15 +23,15 @@ app.use(cors())
 // routing middleware 
 app.use('/api/dccm', routes);
 
-// Prediction endpoint
+// Prediction endpoint // here changes made in req.body 
 app.post('/api/predict', (req, res) => {
-    const { species, age, acres } = req.body;
+    const { treeSpecies, treeAge, landSize } = req.body;
   
     let options = {
       mode: 'text',
-      pythonPath: 'python', // or the path to your Python executable
+      pythonPath: 'python',
       scriptPath: path.join(__dirname, 'python_model'),
-      args: [species, age, acres]
+      args: [treeSpecies, treeAge, landSize]
     };
   
     PythonShell.run('predict.py', options, function (err, results) {
@@ -56,8 +55,8 @@ mongoose.connect(process.env.db_url)
 
 
 // server listening 
-app.listen(PORT, '172.168.72.240', () => {
+app.listen(PORT, '192.168.41.122', () => {
     //server need to change//
-    console.log(`server connected http://172.168.72.240:${PORT}`);
+    console.log(`server connected http://192.168.41.122:${PORT}`);
 });
 

@@ -10,6 +10,6 @@ class CompanyPayments extends StatefulWidget {
 class _CompanyPaymentsState extends State<CompanyPayments> {
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Scaffold();
   }
 }

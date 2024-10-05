@@ -10,6 +10,6 @@ class CompanyMarketplace extends StatefulWidget {
 class _CompanyMarketplaceState extends State<CompanyMarketplace> {
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Scaffold();
   }
 }
