@@ -81,3 +81,18 @@ The **DCCM app** operates with two distinct roles: **land owners** and **compani
 1. Clone the repository:
    ```bash
    git clone https://github.com/MuralidharanKrishnamoorthy/DCCM.git
+
+### Folder structure 
+
+### Backend:
+
+- **AI Model**: Inside the `backend` folder, there's a folder named `node server`, which contains a subfolder `python_model` where the AI-related code is integrated.
+- **API & Server**: The APIs for the app are located in the `routes/authroutes` folder, and the `app.js` file contains the server connection and database connection logic.
+
+### Frontend:
+
+- **Frontend Code**:
+  - Inside the `lib` folder:
+    - The `core` folder contains the `utils` folder, which holds screens available for both landowners and project developers.
+    - The `features` folder contains the login and register API calls along with their corresponding screens.
+
