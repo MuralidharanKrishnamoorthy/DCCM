@@ -1,3 +1,5 @@
+import 'package:dccm/core/presentation/dialogbox/policy_dialog.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -102,6 +104,71 @@ class loginform extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class terms_and_conditions extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      bottom: 40,
+      left: 0,
+      right: 0,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 30),
+        child: RichText(
+          textAlign: TextAlign.center,
+          text: TextSpan(
+            text: "By creating an account, you agree to our\n",
+            style: GoogleFonts.poppins(color: linen, fontSize: 14.7),
+            children: [
+              TextSpan(
+                text: "Terms of Service",
+                style: GoogleFonts.poppins(
+                  color: linen,
+                  fontWeight: FontWeight.bold,
+                ),
+                recognizer: TapGestureRecognizer()
+                  ..onTap = () {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return const PolicyDialog(
+                          radius: 8,
+                          mdfilename: 'terms_conditions.md',
+                        );
+                      },
+                    );
+                  },
+              ),
+              TextSpan(
+                text: " and ",
+                style: GoogleFonts.poppins(color: linen),
+              ),
+              TextSpan(
+                text: "Privacy Policy",
+                style: GoogleFonts.poppins(
+                  color: linen,
+                  fontWeight: FontWeight.bold,
+                ),
+                recognizer: TapGestureRecognizer()
+                  ..onTap = () {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return const PolicyDialog(
+                          radius: 8,
+                          mdfilename: 'privacy_policy.md',
+                        );
+                      },
+                    );
+                  },
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

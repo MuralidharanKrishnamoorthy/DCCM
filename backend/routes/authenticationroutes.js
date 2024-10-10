@@ -185,15 +185,7 @@ routes.post('/projectdetail', upload.fields([{ name: 'uploadedImages' }, { name:
             }
             
             try {
-                // await ProjectDetails.findByIdAndUpdate(projectDetails._id, {
-                //     creditPoints: predictedCredits,
-                //     verified: true
-                // });
-                // // Save the project details after prediction
-                // await projectDetails.save();
-                // console.log("Project saved successfully"); // Debugging statement
-                // // Send response
-                // res.status(201).json(projectDetails);
+                
                 await ProjectDetails.findByIdAndUpdate(savedProject._id, {
                     creditPoints: predictedCredits,
                     verified: true
@@ -236,5 +228,47 @@ routes.get('/projects/:deviceId', async (req, res) => {
         res.status(500).json({ message: "Error fetching projects", error: error.message });
     }
 });
+routes.get('/all-projects', async (req, res) => {
+    try {
+        const projects = await ProjectDetails.find().sort({ createdAt: -1 });
+        res.json(projects);
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching projects", error: error.message });
+    }
+});
+routes.get('/project/:id', async (req, res) => {
+    try {
+        const project = await ProjectDetails.findById(req.params.id);
+        if (!project) {
+            return res.status(404).json({ message: "Project not found" });
+        }
+        res.json(project);
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching project", error: error.message });
+    }
+});
+routes.post('/companyprofile' , async(req,res)=>{
+    
+        try {
+          const companyProfile = new CompanyProfile({
+            companyname: req.body.companyname,
+            email: req.body.email,
+            address: req.body.address,
+            mobilenumber: req.body.mobilenumber,
+            pincode: req.body.pincode,
+            state: req.body.state,
+            country: req.body.country,
+            companyregid: req.body.companyregid,
+            co2emissionrate: req.body.co2emissionrate
+          });
+      
+          const savedProfile = await companyProfile.save();
+          res.status(201).json(savedProfile);
+        } catch (error) {
+          res.status(400).json({ message: error.message });
+        }
+      });
+
+
 
 module.exports = routes;

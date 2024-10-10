@@ -20,7 +20,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class DeviceBinding {
-  static const String baseUrl = 'http://192.168.41.122:8080/api/dccm';
+  static const String baseUrl = 'http://192.168.1.6:8080/api/dccm';
   static Future<String?> getDeviceInfo() async {
     final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
     if (Platform.isAndroid) {

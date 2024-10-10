@@ -16,7 +16,7 @@ class _ProjectdevnavigationState extends State<Projectdevnavigation> {
   final List<Widget> screens = [
     const Projectdevdashboard(),
     const ProjectDetailsUpload(),
-    ProjectStatus()
+    ProjectStatus(),
   ];
   void ontaped(int index) {
     setState(() {

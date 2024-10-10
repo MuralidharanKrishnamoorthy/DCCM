@@ -16,7 +16,7 @@ class _CompanyNavigationState extends State<CompanyNavigation> {
   int currentindex = 0;
   final List<Widget> screens = const [
     CompanyDashboard(),
-    CompanyMarketplace(),
+    MarketplaceScreen(),
     CompanyPayments(),
     CompanyProfile()
   ];
@@ -36,6 +36,8 @@ class _CompanyNavigationState extends State<CompanyNavigation> {
       bottomNavigationBar: BottomNavigationBar(
         selectedItemColor: forest,
         unselectedItemColor: parchment,
+        backgroundColor: spruce,
+        type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),

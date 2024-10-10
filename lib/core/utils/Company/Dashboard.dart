@@ -1,26 +1,29 @@
 import 'package:dccm/Colors.dart';
+import 'package:dccm/core/utils/Company/Marketplace.dart';
 import 'package:flutter/material.dart';
 
-class CompanyDashboard extends StatefulWidget {
+class CompanyDashboard extends StatelessWidget {
   const CompanyDashboard({super.key});
 
   @override
-  State<CompanyDashboard> createState() => _CompanyDashboardState();
-}
-
-class _CompanyDashboardState extends State<CompanyDashboard> {
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(2),
+        child: AppBar(
+          backgroundColor: spruce,
+        ),
+      ),
       backgroundColor: linen,
       body: SafeArea(
-        child: Column(
-          children: [
-            _buildEmissionWidget(),
-            Expanded(
-              child: _buildProjectsWidget(),
-            ),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              _buildEmissionWidget(),
+              _buildImageCard(),
+              _buildManageProjectsSection(context),
+            ],
+          ),
         ),
       ),
     );
@@ -32,10 +35,15 @@ class _CompanyDashboardState extends State<CompanyDashboard> {
       color: spruce,
       child: Column(
         children: [
-          const Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Icon(Icons.favorite_border, color: Colors.white),
+              IconButton(
+                icon: const Icon(Icons.favorite_border, color: Colors.white),
+                onPressed: () {
+                  // Handle favorite action
+                },
+              ),
             ],
           ),
           const SizedBox(height: 20),
@@ -52,102 +60,74 @@ class _CompanyDashboardState extends State<CompanyDashboard> {
                   valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
                 ),
               ),
-              const Text(
-                '12 KgCo2',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold),
+              const Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '12 KgCo2',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Daily Emission',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ],
               ),
             ],
-          ),
-          const SizedBox(height: 10),
-          const Text(
-            'Daily Emission',
-            style: TextStyle(color: Colors.white),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildProjectsWidget() {
+  Widget _buildImageCard() {
+    return Card(
+      margin: const EdgeInsets.all(16),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Image.asset(
+          'images/companydashboard.jpg',
+          fit: BoxFit.cover,
+          height: 300,
+          width: double.infinity,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildManageProjectsSection(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
                 'Manage Projects',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-              Text(
-                'See all',
-                style: TextStyle(color: spruce),
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const MarketplaceScreen()),
+                  );
+                },
+                child: Text(
+                  'See all',
+                  style: TextStyle(color: spruce),
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: ListView(
-              children: [
-                _buildProjectCard(
-                  'Pine Tree',
-                  '8 Acres of pine Tree plantation at Affordable Cost',
-                  'Alabama',
-                ),
-                const SizedBox(height: 16),
-                _buildProjectCard(
-                  'Pine Tree',
-                  '9 Acres of pine Tree plantation at Affordable Cost',
-                  'Alabama',
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProjectCard(String title, String description, String location) {
-    return Card(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            height: 120,
-            color: Colors.grey[300],
-            width: double.infinity,
-            child: const Center(child: Text('Forest Image')),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 4),
-                Text(description),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    const Icon(Icons.location_on, size: 16),
-                    const SizedBox(width: 4),
-                    Text(location),
-                    const Spacer(),
-                    const Icon(Icons.favorite_border),
-                  ],
-                ),
-              ],
-            ),
-          ),
+          // You can add more widgets here if needed
         ],
       ),
     );

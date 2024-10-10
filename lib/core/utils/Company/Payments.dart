@@ -1,3 +1,4 @@
+import 'package:dccm/Colors.dart';
 import 'package:flutter/material.dart';
 
 class CompanyPayments extends StatefulWidget {
@@ -10,6 +11,10 @@ class CompanyPayments extends StatefulWidget {
 class _CompanyPaymentsState extends State<CompanyPayments> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold();
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: spruce,
+      ),
+    );
   }
 }

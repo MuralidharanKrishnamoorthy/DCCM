@@ -65,7 +65,7 @@ void main() {
             create: (context) => DevicebindingBloc()),
         BlocProvider<LoginBloc>(
             create: (context) => LoginBloc(logindatasource.AuthRepository(
-                baseUrl: 'http://192.168.41.122:8080/api/dccm')))
+                baseUrl: 'http://192.168.1.6:8080/api/dccm')))
       ],
       child: MyApp(),
     ),
@@ -73,7 +73,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {

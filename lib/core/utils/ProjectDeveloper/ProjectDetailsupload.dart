@@ -216,7 +216,7 @@ class _ProjectDetailsUploadState extends State<ProjectDetailsUpload> {
     try {
       final request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://192.168.41.122:8080/api/dccm/projectdetail'),
+        Uri.parse('http://192.168.1.6:8080/api/dccm/projectdetail'),
       );
 
       request.fields['landSize'] = _landSizeController.text;
@@ -247,9 +247,7 @@ class _ProjectDetailsUploadState extends State<ProjectDetailsUpload> {
 
       // Send the request
       final response = await request.send();
-      //final responseBody = await response.stream.bytesToString();
-      // print('Response status: ${response.statusCode}');
-      // print('Response body: $responseBody');
+     
 
       if (response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(

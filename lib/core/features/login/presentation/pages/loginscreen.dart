@@ -111,6 +111,9 @@ class _LoginscreenState extends State<Loginscreen> {
                   ],
                 ),
               ),
+              Padding(
+                  padding: EdgeInsets.only(top: 60),
+                  child: terms_and_conditions())
             ],
           );
         },
