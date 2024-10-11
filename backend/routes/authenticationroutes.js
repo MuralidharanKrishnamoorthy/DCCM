@@ -8,6 +8,7 @@ const { validateRegister, validateLogin } = require('../validation');
 const multer = require("multer");
 const { spawn } = require('child_process');
 const path = require('path');
+const CompanyProfile = require('../model/companydetails')
 
 // Multer Storage Setup
 const storage = multer.diskStorage({
@@ -247,28 +248,46 @@ routes.get('/project/:id', async (req, res) => {
         res.status(500).json({ message: "Error fetching project", error: error.message });
     }
 });
-routes.post('/companyprofile' , async(req,res)=>{
-    
-        try {
-          const companyProfile = new CompanyProfile({
-            companyname: req.body.companyname,
-            email: req.body.email,
-            address: req.body.address,
-            mobilenumber: req.body.mobilenumber,
-            pincode: req.body.pincode,
-            state: req.body.state,
-            country: req.body.country,
-            companyregid: req.body.companyregid,
-            co2emissionrate: req.body.co2emissionrate
-          });
-      
-          const savedProfile = await companyProfile.save();
-          res.status(201).json(savedProfile);
-        } catch (error) {
-          res.status(400).json({ message: error.message });
+routes.post('/companyprofile', async (req, res) => {
+    try {
+        const { email, companyregid } = req.body;
+        let companyProfile = await CompanyProfile.findOne({ $or: [{ email }, { companyregid }] });
+
+        if (companyProfile) {
+            // Update existing profile
+            companyProfile = await CompanyProfile.findOneAndUpdate(
+                { $or: [{ email }, { companyregid }] },
+                req.body,
+                { new: true, runValidators: true }
+            );
+        } else {
+            // Create new profile
+            companyProfile = new CompanyProfile(req.body);
+            await companyProfile.save();
         }
-      });
 
+        res.status(200).json(companyProfile);
+    } catch (error) {
+        console.error('Error in /companyprofile POST route:', error);
+        res.status(400).json({ message: error.message });
+    }
+});
+// GET Company Profile
+routes.get('/companyprofile/:identifier', async (req, res) => {
+    try {
+        const { identifier } = req.params;
+        const companyProfile = await CompanyProfile.findOne({
+            $or: [{ email: identifier }, { companyregid: identifier }]
+        });
 
+        if (!companyProfile) {
+            return res.status(404).json({ message: 'Company profile not found' });
+        }
 
+        res.json(companyProfile);
+    } catch (error) {
+        console.error('Error in /companyprofile GET route:', error);
+        res.status(500).json({ message: 'Error fetching company profile', error: error.message });
+    }
+});
 module.exports = routes;

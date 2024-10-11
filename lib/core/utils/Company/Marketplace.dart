@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
@@ -39,20 +40,26 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: linen,
-      appBar: AppBar(
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.systemBackground,
+      navigationBar: CupertinoNavigationBar(
+        //middle:
+        //Text('', style: GoogleFonts.poppins(color: CupertinoColors.white)),
         backgroundColor: spruce,
       ),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
+      child: FutureBuilder<List<Map<String, dynamic>>>(
         future: _projectsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: CupertinoActivityIndicator());
           } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            return Center(
+                child: Text('Error: ${snapshot.error}',
+                    style: GoogleFonts.poppins()));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No projects available'));
+            return Center(
+                child: Text('No projects available',
+                    style: GoogleFonts.poppins()));
           } else {
             return ListView.builder(
               itemCount: snapshot.data!.length,
@@ -68,72 +75,87 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
   }
 
   Widget _buildProjectCard(Map<String, dynamic> project) {
-    return Card(
-      margin: const EdgeInsets.all(8),
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: CupertinoColors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: CupertinoColors.systemGrey.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Image.asset(
-            //project['uploadedImages'][0] ?? 'images/landimage.jpg',
-            'images/landimage.jpg',
-            height: 150,
-            width: double.infinity,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) {
-              return Container(
-                height: 150,
-                color: const Color.fromARGB(255, 212, 209, 209),
-                child: const Center(child: Text('Image not available')),
-              );
-            },
+          ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+            child: Image.asset(
+              'images/landimage.jpg',
+              height: 180,
+              width: double.infinity,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  height: 180,
+                  color: CupertinoColors.systemGrey5,
+                  child: Center(
+                      child: Text('Image not available',
+                          style: GoogleFonts.poppins())),
+                );
+              },
+            ),
           ),
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   project['treeSpecies'] ?? 'Unknown Species',
                   style: GoogleFonts.poppins(
-                      fontWeight: FontWeight.bold, fontSize: 16, color: forest),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    color: forest,
+                  ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 8),
                 Row(
                   children: [
                     Icon(
-                      Icons.location_on,
+                      CupertinoIcons.location_solid,
                       size: 16,
                       color: forest,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       '${project['state']}, ${project['country']}',
-                      style: GoogleFonts.niramit(),
+                      style: GoogleFonts.niramit(fontSize: 14),
                     ),
                   ],
                 ),
+                const SizedBox(height: 16),
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  child: Text(
+                    'View Details',
+                    style: GoogleFonts.poppins(color: spruce),
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      CupertinoPageRoute(
+                        builder: (context) =>
+                            ProjectDetailScreen(projectId: project['_id']),
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
-          ),
-          OverflowBar(
-            alignment: MainAxisAlignment.end,
-            children: [
-              TextButton(
-                child: Text(
-                  'View Details',
-                  style: TextStyle(color: spruce),
-                ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          ProjectDetailScreen(projectId: project['_id']),
-                    ),
-                  );
-                },
-              ),
-            ],
           ),
         ],
       ),

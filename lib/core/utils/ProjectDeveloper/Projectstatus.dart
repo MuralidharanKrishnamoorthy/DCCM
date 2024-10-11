@@ -177,20 +177,17 @@ class _ProjectStatusState extends State<ProjectStatus>
   }
 }
 
-// AuthRepository to handle device ID and auth token retrieval
 class AuthRepository {
   final String baseUrl;
   AuthRepository({required this.baseUrl});
 
-  // Fetch Device ID
   Future<String?> getDeviceId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString('deviceId'); // Example key for deviceId
+    return prefs.getString('deviceId');
   }
 
-  // Fetch Auth Token
   Future<String?> getAuthToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString('auth-token'); // Example key for auth-token
+    return prefs.getString('auth-token');
   }
 }
