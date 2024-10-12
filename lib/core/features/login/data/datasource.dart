@@ -6,6 +6,7 @@ class AuthRepository {
   final String baseUrl;
   // ignore: non_constant_identifier_names
   static String DEVICE_ID_KEY = 'device_id';
+  // ignore: constant_identifier_names
   static const String AUTH_TOKEN_KEY = 'auth-token';
 
   AuthRepository({required this.baseUrl});
@@ -24,6 +25,11 @@ class AuthRepository {
 
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
+        await _saveAuthData(responseData);
+
+        // Add this line to save the email
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('email', email);
         return responseData['token'];
       } else {
         throw Exception('Login failed: ${response.body}');

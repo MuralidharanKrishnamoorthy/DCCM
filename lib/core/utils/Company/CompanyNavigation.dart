@@ -36,7 +36,7 @@ class _CompanyNavigationState extends State<CompanyNavigation> {
       bottomNavigationBar: BottomNavigationBar(
         selectedItemColor: forest,
         unselectedItemColor: parchment,
-        backgroundColor: spruce,
+        backgroundColor: AppTheme.getNavBarBackgroundColor(context),
         type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(

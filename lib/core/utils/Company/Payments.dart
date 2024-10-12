@@ -13,7 +13,7 @@ class _CompanyPaymentsState extends State<CompanyPayments> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: spruce,
+        backgroundColor: AppTheme.getAppBarBackgroundColor(context),
       ),
     );
   }

@@ -1,3 +1,4 @@
+import 'package:dccm/Colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
@@ -121,7 +122,7 @@ class _CompanyProfileState extends State<CompanyProfile> {
                     Container(
                       height: MediaQuery.of(context).size.height * 0.25,
                       decoration: BoxDecoration(
-                        color: Colors.teal[700],
+                        color: AppTheme.getAppBarBackgroundColor(context),
                         borderRadius: const BorderRadius.only(
                           bottomLeft: Radius.circular(30),
                           bottomRight: Radius.circular(30),
@@ -143,10 +144,12 @@ class _CompanyProfileState extends State<CompanyProfile> {
                         child: Row(
                           children: [
                             CircleAvatar(
-                              backgroundColor: Colors.white,
+                              backgroundColor:
+                                  AppTheme.getTertiaryIconColor(context),
                               radius: 30,
                               child: Icon(Icons.person,
-                                  color: Colors.teal[700], size: 40),
+                                  color: AppTheme.getPrimaryIconColor(context),
+                                  size: 40),
                             ),
                             const SizedBox(width: 15),
                           ],

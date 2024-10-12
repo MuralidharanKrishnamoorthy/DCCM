@@ -5,7 +5,8 @@ import 'package:dccm/core/utils/ProjectDeveloper/Projectstatus.dart';
 import 'package:flutter/material.dart';
 
 class Projectdevnavigation extends StatefulWidget {
-  const Projectdevnavigation({super.key});
+  const Projectdevnavigation(
+      {super.key, required Map<String, int> projectCounts});
 
   @override
   State<Projectdevnavigation> createState() => _ProjectdevnavigationState();
@@ -14,7 +15,7 @@ class Projectdevnavigation extends StatefulWidget {
 class _ProjectdevnavigationState extends State<Projectdevnavigation> {
   int currntindex = 0;
   final List<Widget> screens = [
-    const Projectdevdashboard(),
+    const ProjectDeveloperDashboard(),
     const ProjectDetailsUpload(),
     ProjectStatus(),
   ];
@@ -32,13 +33,16 @@ class _ProjectdevnavigationState extends State<Projectdevnavigation> {
         children: screens,
       ),
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: spruce,
-        selectedItemColor: forest,
+        backgroundColor: AppTheme.getNavBarBackgroundColor(context),
+        selectedItemColor: AppTheme.getNavigationBarIconColor(context),
         unselectedItemColor: parchment,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
           BottomNavigationBarItem(
-              icon: Icon(Icons.upload), label: "Details Upload"),
+              icon: Icon(Icons.other_houses), label: "Home"),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.cloud_upload),
+            label: "Details Upload",
+          ),
           BottomNavigationBarItem(icon: Icon(Icons.verified), label: "Status")
         ],
         currentIndex: currntindex,

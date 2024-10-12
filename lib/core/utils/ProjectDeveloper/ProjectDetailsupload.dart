@@ -1,7 +1,9 @@
 // ignore_for_file: non_constant_identifier_names
 
 import 'package:dccm/Colors.dart';
+import 'package:dccm/core/utils/ProjectDeveloper/ProjectDeveloperNavigate.dart';
 import 'package:dccm/core/utils/ProjectDeveloper/data/sucsessdialog.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -59,23 +61,35 @@ class _ProjectDetailsUploadState extends State<ProjectDetailsUpload> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: linen,
-      appBar: AppBar(
-        backgroundColor: spruce,
-        elevation: 0,
-        title: Text(
-          'Upload Project',
-          style: GoogleFonts.lato(
-            textStyle: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+      backgroundColor: kParchment,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(45),
+        child: AppBar(
+          backgroundColor: AppTheme.getAppBarBackgroundColor(context),
+          elevation: 0,
+          leading: CupertinoButton(
+            padding: const EdgeInsets.only(
+                left: 15), // Remove padding to align it closely
+            child: CircleAvatar(
+              backgroundColor:
+                  AppTheme.getAppBarForegroundColor(context).withOpacity(0.1),
+              radius: 18, // Smaller size for a cute appearance
+              child: Icon(
+                CupertinoIcons.back,
+                color: AppTheme.getActionIconColor(context),
+              ),
             ),
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                CupertinoPageRoute(
+                  builder: (context) => const Projectdevnavigation(
+                    projectCounts: {},
+                  ),
+                ),
+              );
+            },
           ),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
         ),
       ),
       body: SingleChildScrollView(
@@ -207,7 +221,7 @@ class _ProjectDetailsUploadState extends State<ProjectDetailsUpload> {
   Future<void> _uploadProjectDetails() async {
     if (_landImage == null || _landPattaImage == null) {
       // Show an error message if images are not uploaded
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Please upload both Land Image and Land Patta Document'),
       ));
       return;
@@ -247,21 +261,23 @@ class _ProjectDetailsUploadState extends State<ProjectDetailsUpload> {
 
       // Send the request
       final response = await request.send();
-     
 
       if (response.statusCode == 201) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Project details uploaded successfully!'),
         ));
         // ignore: use_build_context_synchronously
         showSuccessDialog(context);
       } else {
+        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(
               'Failed to upload project details. Status: ${response.statusCode}'),
         ));
       }
     } catch (error) {
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('An error occurred: $error'),
       ));
@@ -304,7 +320,7 @@ class _ProjectDetailsUploadState extends State<ProjectDetailsUpload> {
           _uploadProjectDetails();
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor: forest,
+          backgroundColor: AppTheme.getPrimaryButtonColor(context),
           padding: const EdgeInsets.symmetric(vertical: 15),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
@@ -384,13 +400,16 @@ class _ProjectDetailsUploadState extends State<ProjectDetailsUpload> {
           });
         }
       },
-      icon: const Icon(Icons.cloud_upload_outlined),
+      icon: Icon(
+        Icons.cloud_upload_outlined,
+        color: AppTheme.getNavBarBackgroundColor(context),
+      ),
       label: Text(
         'Upload Land Patta',
         style: GoogleFonts.lato(fontSize: 16, color: parchment),
       ),
       style: ElevatedButton.styleFrom(
-        backgroundColor: spruce,
+        backgroundColor: AppTheme.getPrimaryButtonColor(context),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),

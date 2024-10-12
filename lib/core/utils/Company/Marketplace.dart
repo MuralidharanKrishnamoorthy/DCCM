@@ -41,11 +41,11 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemBackground,
+      backgroundColor: kParchment,
       navigationBar: CupertinoNavigationBar(
         //middle:
         //Text('', style: GoogleFonts.poppins(color: CupertinoColors.white)),
-        backgroundColor: spruce,
+        backgroundColor: AppTheme.getAppBarBackgroundColor(context),
       ),
       child: FutureBuilder<List<Map<String, dynamic>>>(
         future: _projectsFuture,
@@ -78,7 +78,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: CupertinoColors.white,
+        color: AppTheme.getCardBackgroundColor(context),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -119,7 +119,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                   style: GoogleFonts.poppins(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
-                    color: forest,
+                    color: AppTheme.getPrimaryTextColor(context),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -128,12 +128,14 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                     Icon(
                       CupertinoIcons.location_solid,
                       size: 16,
-                      color: forest,
+                      color: sunlitLeaf,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       '${project['state']}, ${project['country']}',
-                      style: GoogleFonts.niramit(fontSize: 14),
+                      style: GoogleFonts.niramit(
+                          fontSize: 14,
+                          color: AppTheme.getSecondaryTextColor(context)),
                     ),
                   ],
                 ),
@@ -142,7 +144,7 @@ class _MarketplaceScreenState extends State<MarketplaceScreen> {
                   padding: EdgeInsets.zero,
                   child: Text(
                     'View Details',
-                    style: GoogleFonts.poppins(color: spruce),
+                    style: GoogleFonts.poppins(color: sunlitLeaf),
                   ),
                   onPressed: () {
                     Navigator.push(

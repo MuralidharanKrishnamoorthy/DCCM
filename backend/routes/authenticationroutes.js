@@ -102,7 +102,6 @@ routes.post('/login', async (req, res) => {
     }
 });
 
-// Project Details Upload API
 routes.post('/projectdetail', upload.fields([{ name: 'uploadedImages' }, { name: 'landPattaImage' }]), async (req, res) => {
     if (!req.files || !req.files['landPattaImage'] || !req.files['uploadedImages']) {
         return res.status(400).json({ error: 'Image uploads failed or missing required files.' });
@@ -168,7 +167,8 @@ routes.post('/projectdetail', upload.fields([{ name: 'uploadedImages' }, { name:
             metamaskid,
             uploadedImages, 
             verified: false,
-            creditPoints: 0
+            creditPoints: 0,
+            deviceId: req.body.deviceId
         });
         const savedProject = await projectDetails.save();
 
