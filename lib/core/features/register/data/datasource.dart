@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class AuthRepository {
-  final String baseUrl = 'http://192.168.1.6:8080/api/dccm';
+  final String baseUrl = 'http://192.168.122.19:8080/api/dccm';
 
   Future<String> register(String email, String password, String selectedRole,
       String deviceId) async {

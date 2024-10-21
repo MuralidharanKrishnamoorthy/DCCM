@@ -81,6 +81,14 @@ const projectSchema = new mongoose.Schema({
   creditPoints: {
     type: Number,
     default: 0
+  },
+  finalPrice: {
+    type: Number,
+    default: 0
+  },
+  toucanPrice: {
+    type: Number,
+    default: 0
   }
 }, { timestamps: true });
 

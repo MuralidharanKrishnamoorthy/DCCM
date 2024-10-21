@@ -1,8 +1,12 @@
 import 'package:dccm/Colors.dart';
+import 'package:dccm/core/utils/Company/Marketplace.dart';
+import 'package:dccm/customappbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:ui';
+
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CompanyDashboard extends StatefulWidget {
   const CompanyDashboard({super.key});
@@ -15,38 +19,99 @@ class _CompanyDashboardState extends State<CompanyDashboard> {
   static const Color kPrimaryGreen = Color(0xFF4CAF50);
   static const Color kAccentOrange = Color(0xFFFF9800);
   static const Color kTextColor = Color(0xFF333333);
+  double _co2EmissionRate = 0.0;
+  @override
+  void initState() {
+    super.initState();
+    _loadCO2EmissionRate();
+  }
+
+  Future<void> _loadCO2EmissionRate() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final dynamic rateValue = prefs.get('co2_emission_rate');
+      print('Loaded CO2 emission rate value: $rateValue'); // Debug print
+      print(
+          'Type of loaded emission rate: ${rateValue.runtimeType}'); // Debug print
+
+      if (rateValue != null) {
+        double? rate;
+        if (rateValue is String) {
+          rate = double.tryParse(rateValue);
+        } else if (rateValue is double) {
+          rate = rateValue;
+        } else if (rateValue is int) {
+          rate = rateValue.toDouble();
+        }
+
+        if (rate != null) {
+          setState(() {
+            _co2EmissionRate = rate!;
+          });
+          print('Parsed CO2 emission rate: $_co2EmissionRate'); // Debug print
+        } else {
+          print('Failed to parse CO2 emission rate: $rateValue');
+          _co2EmissionRate = 0.0;
+        }
+      } else {
+        print('CO2 emission rate not found in SharedPreferences');
+        _co2EmissionRate = 0.0; // Set a default value if no data is found
+      }
+    } catch (e) {
+      print('Error loading CO2 emission rate: $e');
+      _co2EmissionRate = 0.0; // Set a default value if an error occurs
+    }
+  }
+
+  String _calculateEmission(String period) {
+    print(
+        'Calculating emission for $period, daily rate: $_co2EmissionRate'); // Debug print
+    switch (period) {
+      case 'Daily':
+        return _co2EmissionRate.toStringAsFixed(2);
+      case 'Monthly':
+        return (_co2EmissionRate * 30).toStringAsFixed(2);
+      case 'Yearly':
+        return (_co2EmissionRate * 365).toStringAsFixed(2);
+      default:
+        return '0.00';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      backgroundColor: kParchment,
-      navigationBar: CupertinoNavigationBar(
-        backgroundColor: AppTheme.getAppBarBackgroundColor(context),
-        border: null,
-        automaticallyImplyLeading: false,
-      ),
-      child: SafeArea(
-        child: CustomScrollView(
-          physics: const BouncingScrollPhysics(),
-          slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildWelcomeSection(),
-                    const SizedBox(height: 24),
-                    _buildEmissionMetrics(),
-                    const SizedBox(height: 24),
-                    _buildQuickActions(),
-                    const SizedBox(height: 24),
-                    _buildPurchasedProjects(),
-                  ],
+    return Material(
+      child: CupertinoPageScaffold(
+        backgroundColor: kParchment,
+        navigationBar: const CustomAppbar(),
+        // CupertinoNavigationBar(
+        //   backgroundColor: AppTheme.getAppBarBackgroundColor(context),
+        //   border: null,
+        //   automaticallyImplyLeading: false,
+        // ),
+        child: SafeArea(
+          child: CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildWelcomeSection(),
+                      const SizedBox(height: 24),
+                      _buildEmissionMetrics(),
+                      const SizedBox(height: 24),
+                      _buildQuickActions(),
+                      const SizedBox(height: 24),
+                      _buildPurchasedProjects(),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -114,9 +179,15 @@ class _CompanyDashboardState extends State<CompanyDashboard> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _buildEmissionItem("Daily", "12", "KgCO2"),
-                    _buildEmissionItem("Monthly", "360", "KgCO2"),
-                    _buildEmissionItem("Yearly", "4,380", "KgCO2"),
+                    Expanded(
+                        child: _buildEmissionItem(
+                            "Daily", _calculateEmission("Daily"), "KgCO2")),
+                    Expanded(
+                        child: _buildEmissionItem(
+                            "Monthly", _calculateEmission("Monthly"), "KgCO2")),
+                    Expanded(
+                        child: _buildEmissionItem(
+                            "Yearly", _calculateEmission("Yearly"), "KgCO2")),
                   ],
                 ),
                 const SizedBox(height: 24),
@@ -142,7 +213,7 @@ class _CompanyDashboardState extends State<CompanyDashboard> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
+              const Icon(
                 CupertinoIcons.tree,
                 color: kLinen,
                 size: 24,
@@ -198,14 +269,26 @@ class _CompanyDashboardState extends State<CompanyDashboard> {
   }
 
   Widget _buildEmissionItem(String label, String value, String unit) {
+    String addSpacesToValue(String input) {
+      return input.replaceAllMapped(
+        RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+        (Match m) => '${m[1]} ',
+      );
+    }
+
     return Column(
       children: [
-        Text(
-          value,
-          style: GoogleFonts.poppins(
-            color: kLinen,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            addSpacesToValue(value),
+            style: GoogleFonts.poppins(
+              color: kLinen,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              letterSpacing:
+                  1.2, // Add some letter spacing for better readability
+            ),
           ),
         ),
         const SizedBox(height: 4),
@@ -213,7 +296,7 @@ class _CompanyDashboardState extends State<CompanyDashboard> {
           unit,
           style: GoogleFonts.poppins(
             color: kLinen.withOpacity(0.8),
-            fontSize: 14,
+            fontSize: 12,
           ),
         ),
         const SizedBox(height: 4),
@@ -265,26 +348,32 @@ class _CompanyDashboardState extends State<CompanyDashboard> {
   }
 
   Widget _buildActionCard(String title, IconData icon, Color color) {
-    return Container(
-      height: 120,
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: color.withOpacity(0.5), width: 1),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: color, size: 40),
-          const SizedBox(height: 8),
-          Text(
-            title,
-            style: GoogleFonts.poppins(
-              color: color,
-              fontWeight: FontWeight.bold,
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const MarketplaceScreen()));
+      },
+      child: Container(
+        height: 120,
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(color: color.withOpacity(0.5), width: 1),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: color, size: 40),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              style: GoogleFonts.poppins(
+                color: color,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

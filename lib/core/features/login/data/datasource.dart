@@ -64,14 +64,3 @@ class AuthRepository {
     // Don't remove the device ID as it's bound to the device
   }
 }
-
-// class LoginModel {
-//   final String email;
-//   final String token;
-
-//   LoginModel({required this.email, required this.token});
-
-//   factory LoginModel.fromJson(Map<String, dynamic> json) {
-//     return LoginModel(email: json['email'], token: json['token']);
-//   }
-// }

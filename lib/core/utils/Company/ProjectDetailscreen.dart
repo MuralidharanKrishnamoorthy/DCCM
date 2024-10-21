@@ -1,9 +1,13 @@
 import 'package:dccm/Colors.dart';
+import 'package:dccm/core/utils/Company/CompanyNavigation.dart';
 import 'package:dccm/core/utils/Company/Payments.dart';
+import 'package:dccm/customappbar.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:intl/intl.dart';
 
 class ProjectDetailScreen extends StatefulWidget {
   final String projectId;
@@ -17,9 +21,17 @@ class ProjectDetailScreen extends StatefulWidget {
 
 class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
   late Future<Map<String, dynamic>> _projectFuture;
-  static const String baseUrl = 'http://192.168.1.6:8080/api/dccm';
+  static const String baseUrl = 'http://192.168.122.19:8080/api/dccm';
   final ScrollController _scrollController = ScrollController();
-  final List<GlobalKey> _sectionKeys = List.generate(3, (_) => GlobalKey());
+  final currencyFormatter =
+      NumberFormat.currency(locale: 'en_US', symbol: '\$');
+  int _selectedSegment = 0;
+
+  static const Color kPrimaryColor = Color(0xFF1C1C1E);
+  static const Color kAccentColor = Color(0xFFD4AF37);
+  static const Color kBackgroundColor = CupertinoColors.systemBackground;
+  static const Color kTextColor = CupertinoColors.label;
+  static const Color kSecondaryTextColor = CupertinoColors.secondaryLabel;
 
   @override
   void initState() {
@@ -43,208 +55,318 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
     }
   }
 
-  void _scrollToSection(int index) {
-    final context = _sectionKeys[index].currentContext;
-    if (context != null) {
-      Scrollable.ensureVisible(
-        context,
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeInOut,
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: linen,
-      body: FutureBuilder<Map<String, dynamic>>(
-        future: _projectFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData) {
-            return const Center(child: Text('No data available'));
-          }
-
-          var project = snapshot.data!;
-          return Stack(
-            children: [
-              CustomScrollView(
-                controller: _scrollController,
-                slivers: [
-                  SliverToBoxAdapter(child: _buildHeaderImage(project)),
-                  SliverToBoxAdapter(child: _buildTabBar()),
-                  SliverToBoxAdapter(
-                      child: _buildDetailsSection(project, _sectionKeys[0])),
-                  SliverToBoxAdapter(
-                      child: _buildLocationSection(project, _sectionKeys[1])),
-                  SliverToBoxAdapter(
-                      child: _buildContactSection(project, _sectionKeys[2])),
-                  SliverPadding(padding: EdgeInsets.only(bottom: 80)),
-                ],
+    return Material(
+      child: CupertinoPageScaffold(
+        backgroundColor: kParchment,
+        navigationBar: CustomAppbar(
+          leading: GestureDetector(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const CompanyNavigation()),
+            ),
+            child: CircleAvatar(
+              backgroundColor: AppTheme.getTertiaryIconColor(context),
+              child: Icon(
+                CupertinoIcons.back,
+                color: AppTheme.getAppBarForegroundColor(context),
+                size: 20, // Adjust size as needed
               ),
-              _buildBackButton(),
-              _buildBottomBar(project),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildHeaderImage(Map<String, dynamic> project) {
-    return Container(
-      height: 300,
-      decoration: BoxDecoration(
-        image: DecorationImage(
-          image: AssetImage(
-              project['uploadedImages']?[0] ?? 'images/landimage.jpg'),
-          fit: BoxFit.cover,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBackButton() {
-    return Positioned(
-      top: 40,
-      left: 20,
-      child: CircleAvatar(
-        backgroundColor: Colors.white,
-        child: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTabBar() {
-    return Container(
-      color: Colors.white,
-      child: Row(
-        children: [
-          _buildTab('Details', onTap: () => _scrollToSection(0)),
-          _buildTab('Location', onTap: () => _scrollToSection(1)),
-          _buildTab('Contact', onTap: () => _scrollToSection(2)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTab(String title, {required VoidCallback onTap}) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 15),
-          child: Text(
-            title,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.normal,
             ),
           ),
         ),
-      ),
-    );
-  }
+        child: SafeArea(
+          child: FutureBuilder<Map<String, dynamic>>(
+            future: _projectFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CupertinoActivityIndicator());
+              } else if (snapshot.hasError) {
+                return Center(
+                    child: Text('Error: ${snapshot.error}',
+                        style: TextStyle(color: kTextColor)));
+              } else if (!snapshot.hasData) {
+                return Center(
+                    child: Text('No data available',
+                        style: TextStyle(color: kTextColor)));
+              }
 
-  Widget _buildDetailsSection(Map<String, dynamic> project, Key key) {
-    return Padding(
-      key: key,
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Project Details',
-              style: GoogleFonts.poppins(
-                  fontSize: 20, fontWeight: FontWeight.bold, color: forest)),
-          const SizedBox(height: 10),
-          Text('Project ID: ${project['projectId'] ?? 'N/A'}'),
-          Text('Issuer ID: ${project['issuerId'] ?? 'N/A'}'),
-          Text('Survey ID: ${project['surveyId'] ?? 'N/A'}'),
-          const SizedBox(height: 10),
-          Text(project['projectDetail'] ?? 'No details available'),
-          const SizedBox(height: 20),
-          Text('Tree Information',
-              style: GoogleFonts.poppins(
-                  fontSize: 20, fontWeight: FontWeight.bold, color: forest)),
-          const SizedBox(height: 10),
-          Text('Land Size: ${project['landSize'] ?? 'N/A'}'),
-          Text('Tree Age: ${project['treeAge'] ?? 'N/A'}'),
-          Text('Tree Species: ${project['treeSpecies'] ?? 'N/A'}'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLocationSection(Map<String, dynamic> project, Key key) {
-    return Padding(
-      key: key,
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Location',
-              style: GoogleFonts.poppins(
-                  fontSize: 20, fontWeight: FontWeight.bold, color: forest)),
-          const SizedBox(height: 10),
-          Text('Country: ${project['country'] ?? 'N/A'}'),
-          Text('State: ${project['state'] ?? 'N/A'}'),
-          Text('Pincode: ${project['pincode'] ?? 'N/A'}'),
-          Text('Landmark: ${project['landmark'] ?? 'N/A'}'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildContactSection(Map<String, dynamic> project, Key key) {
-    return Padding(
-      key: key,
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Contact Information',
-              style: GoogleFonts.poppins(
-                  fontSize: 20, fontWeight: FontWeight.bold, color: forest)),
-          const SizedBox(height: 10),
-          Text('Landowner: ${project['landownername'] ?? 'N/A'}'),
-          Text('Email: ${project['email'] ?? 'N/A'}'),
-          Text('Phone: ${project['phone'] ?? 'Not provided'}'),
-          const SizedBox(height: 20),
-          Text(
-            'Credits you Earn',
-            style: GoogleFonts.poppins(
-                color: forest, fontSize: 20, fontWeight: FontWeight.bold),
+              var project = snapshot.data!;
+              return Column(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      controller: _scrollController,
+                      physics: const BouncingScrollPhysics(),
+                      child: Column(
+                        children: [
+                          _buildHeader(project),
+                          _buildSegmentedControl(),
+                          _buildSelectedSection(project),
+                        ],
+                      ),
+                    ),
+                  ),
+                  _buildBottomBar(project),
+                ],
+              );
+            },
           ),
-          const SizedBox(height: 10),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(Map<String, dynamic> project) {
+    return _buildSectionCard(
+      'Project Overview',
+      [
+        _buildInfoRow('DCCM', project['projectDetail']?.toString() ?? 'N/A'),
+        _buildInfoRow('Survey ID', project['surveyId']?.toString() ?? 'N/A'),
+      ],
+      icon: CupertinoIcons.doc_text,
+    );
+  }
+
+  Widget _buildSegmentedControl() {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+      child: CupertinoSlidingSegmentedControl<int>(
+        children: const {
+          0: Text('Details'),
+          1: Text('Location'),
+          2: Text('Contact'),
+        },
+        onValueChanged: (int? value) {
+          if (value != null) {
+            setState(() {
+              _selectedSegment = value;
+            });
+          }
+        },
+        groupValue: _selectedSegment,
+        backgroundColor: kBackgroundColor,
+        thumbColor: kAccentColor,
+      ),
+    );
+  }
+
+  Widget _buildSelectedSection(Map<String, dynamic> project) {
+    switch (_selectedSegment) {
+      case 0:
+        return _buildDetailsSection(project);
+      case 1:
+        return _buildLocationSection(project);
+      case 2:
+        return _buildContactSection(project);
+      default:
+        return SizedBox.shrink();
+    }
+  }
+
+  Widget _buildSectionCard(String title, List<Widget> children,
+      {IconData? icon}) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: kBackgroundColor,
+        border: Border(
+          bottom: BorderSide(color: kAccentColor.withOpacity(0.3), width: 1),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              if (icon != null) Icon(icon, color: kAccentColor, size: 24),
+              if (icon != null) const SizedBox(width: 8),
+              Text(
+                title,
+                style: TextStyle(
+                    color: kTextColor,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          SizedBox(height: 16),
+          ...children,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailsSection(Map<String, dynamic> project) {
+    return Column(
+      children: [
+        _buildSectionCard(
+          'Tree Information',
+          [
+            _buildInfoRow(
+                'Land Size', project['landSize']?.toString() ?? 'N/A'),
+            _buildInfoRow('Tree Age', project['treeAge']?.toString() ?? 'N/A'),
+            _buildInfoRow(
+                'Tree Species', project['treeSpecies']?.toString() ?? 'N/A'),
+          ],
+          icon: CupertinoIcons.tree,
+        ),
+        _buildSectionCard(
+          'Carbon Credits',
+          [
+            Text(
+              'By purchasing this project, you will reduce:',
+              style: TextStyle(color: kTextColor, fontSize: 18),
+            ),
+            SizedBox(height: 8),
+            Text(
+              '${project['creditPoints']?.toString() ?? '0'} Tons of CO2',
+              style: TextStyle(
+                  color: kAccentColor,
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'from the environment',
+              style: TextStyle(color: kTextColor, fontSize: 18),
+            ),
+          ],
+          icon: CupertinoIcons.leaf_arrow_circlepath,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLocationSection(Map<String, dynamic> project) {
+    return _buildSectionCard(
+      'Location',
+      [
+        _buildInfoRow('Country', project['country']?.toString() ?? 'N/A'),
+        _buildInfoRow('State', project['state']?.toString() ?? 'N/A'),
+        _buildInfoRow('Pincode', project['pincode']?.toString() ?? 'N/A'),
+        _buildInfoRow('Landmark', project['landmark']?.toString() ?? 'N/A'),
+      ],
+      icon: CupertinoIcons.location,
+    );
+  }
+
+  Widget _buildContactSection(Map<String, dynamic> project) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionCard(
+          'Contact Information',
+          [
+            _buildInfoRow(
+                'Landowner', project['landownername']?.toString() ?? 'N/A'),
+            _buildInfoRow('Email', project['email']?.toString() ?? 'N/A'),
+            _buildInfoRow(
+                'Phone', project['issuerId']?.toString() ?? 'Not provided'),
+          ],
+          icon: CupertinoIcons.person,
+        ),
+        _buildSectionCard(
+          'Additional Information',
+          [
+            _buildCopyableInfoRow(
+                'Metamask ID', project['metamaskid']?.toString() ?? 'N/A'),
+          ],
+          icon: CupertinoIcons.info_circle,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label,
+              style: TextStyle(color: kSecondaryTextColor, fontSize: 16)),
           Text(
-              'If you buy this project you will reduce ${project['creditPoints']} Tons of CO2 from the Environment'),
-          const SizedBox(height: 10),
-          Text('Additional Information',
-              style: GoogleFonts.poppins(
-                  fontSize: 20, fontWeight: FontWeight.bold, color: forest)),
-          const SizedBox(height: 10),
-          Text('Metamask ID: ${project['metamaskid'] ?? 'N/A'}'),
+            value,
+            style: TextStyle(
+                color: kTextColor, fontSize: 18, fontWeight: FontWeight.w600),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCopyableInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label,
+              style: TextStyle(color: kSecondaryTextColor, fontSize: 16)),
+          GestureDetector(
+            onTap: () {
+              Clipboard.setData(ClipboardData(text: value));
+              _showCopiedToast(context);
+            },
+            child: Row(
+              children: [
+                Text(value,
+                    style: TextStyle(
+                        color: kTextColor,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600)),
+                const SizedBox(width: 8),
+                Icon(CupertinoIcons.doc_on_doc, size: 18, color: kAccentColor)
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showCopiedToast(BuildContext context) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+        title:
+            Text('Copied to clipboard', style: TextStyle(color: kPrimaryColor)),
+        actions: [
+          CupertinoActionSheetAction(
+            child: Text('OK', style: TextStyle(color: kPrimaryColor)),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
         ],
       ),
     );
   }
 
   Widget _buildBottomBar(Map<String, dynamic> project) {
-    return Positioned(
-      bottom: 0,
-      left: 0,
-      right: 0,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        color: Colors.white,
+    String formattedPrice = 'N/A';
+    if (project['finalPrice'] != null) {
+      formattedPrice = currencyFormatter.format(project['finalPrice']);
+    }
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: kBackgroundColor,
+        boxShadow: [
+          BoxShadow(
+            color: CupertinoColors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        top: false,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -253,27 +375,36 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text('Price',
-                    style: GoogleFonts.poppins(
-                        color: spruce, fontWeight: FontWeight.bold)),
-                Text('\$${project['price'] ?? '0.00'}',
-                    style: const TextStyle(
-                        fontSize: 24, fontWeight: FontWeight.bold)),
+                    style: TextStyle(color: kSecondaryTextColor, fontSize: 18)),
+                Text(formattedPrice,
+                    style: TextStyle(
+                        color: kPrimaryColor,
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold)),
               ],
             ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const CompanyPayments()));
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: spruce,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-              ),
+            CupertinoButton(
+              color: kAccentColor,
+              borderRadius: BorderRadius.circular(3),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
               child: Text('Buy Now',
-                  style: TextStyle(fontSize: 18, color: parchment)),
+                  style: TextStyle(
+                      color: kPrimaryColor,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600)),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  CupertinoPageRoute(
+                    builder: (context) => PaymentScreen(
+                      project: {
+                        'projectDetail': project['projectDetail'],
+                        'metamaskid': project['metamaskid'],
+                      },
+                    ),
+                  ),
+                );
+              },
             ),
           ],
         ),

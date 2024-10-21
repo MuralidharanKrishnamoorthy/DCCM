@@ -9,14 +9,15 @@ const multer = require("multer");
 const { spawn } = require('child_process');
 const path = require('path');
 const CompanyProfile = require('../model/companydetails')
+const { getTCO2Price, calculateUSDCAmount } = require("./toucanprotocol");
 
 // Multer Storage Setup
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'uploads/'); 
+        cb(null, 'uploads/');
     },
     filename: (req, file, cb) => {
-        cb(null, Date.now() + '-' + file.originalname); 
+        cb(null, Date.now() + '-' + file.originalname);
     }
 });
 
@@ -127,16 +128,16 @@ routes.post('/projectdetail', upload.fields([{ name: 'uploadedImages' }, { name:
     const parsedTreeAge = parseInt(treeAge);
 
     if (
-        !parsedLandSize || 
-        !surveyId || 
+        !parsedLandSize ||
+        !surveyId ||
         !treeSpecies ||
-        !parsedTreeAge || 
-        !country || 
-        !state || 
-        !pincode || 
-        !landmark || 
-        !email || 
-        !issuerId || 
+        !parsedTreeAge ||
+        !country ||
+        !state ||
+        !pincode ||
+        !landmark ||
+        !email ||
+        !issuerId ||
         !projectDetail ||
         !landownername ||
         !metamaskid
@@ -165,7 +166,7 @@ routes.post('/projectdetail', upload.fields([{ name: 'uploadedImages' }, { name:
             projectDetail,
             landownername,
             metamaskid,
-            uploadedImages, 
+            uploadedImages,
             verified: false,
             creditPoints: 0,
             deviceId: req.body.deviceId
@@ -178,22 +179,26 @@ routes.post('/projectdetail', upload.fields([{ name: 'uploadedImages' }, { name:
 
         pythonProcess.stdout.on('data', async (data) => {
             const predictedCredits = parseFloat(data.toString().trim());
-            console.log("Predicted Credits:", predictedCredits); 
+            console.log("Predicted Credits:", predictedCredits);
 
             if (isNaN(predictedCredits)) {
                 console.error('Invalid response from AI model');
                 return res.status(500).json({ error: 'Invalid response from AI model' });
             }
-            
+
             try {
-                
+                const toucanPrice = await getTCO2Price();
+                const finalPrice = predictedCredits * toucanPrice;
                 await ProjectDetails.findByIdAndUpdate(savedProject._id, {
                     creditPoints: predictedCredits,
-                    verified: true
+                    verified: true,
+                    finalPrice: finalPrice,
+                    toucanPrice: toucanPrice
                 }, { new: true }); // Optionally use { new: true } to return the updated document
 
                 console.log("Project updated with credits and verification");
-                res.status(201).json({ message: "Project saved and updated with AI result", projectId: savedProject._id });
+                res.status(201).json({ message: "Project saved and updated with AI result", projectId: savedProject._id,
+                    finalPrice: finalPrice });
             } catch (error) {
                 console.error("Failed to save project with AI result:", error);
                 res.status(500).json({ error: 'Failed to save project with AI result' });
@@ -248,21 +253,24 @@ routes.get('/project/:id', async (req, res) => {
         res.status(500).json({ message: "Error fetching project", error: error.message });
     }
 });
+
+
+// POST Company Profile (Create or Update)
 routes.post('/companyprofile', async (req, res) => {
     try {
-        const { email, companyregid } = req.body;
-        let companyProfile = await CompanyProfile.findOne({ $or: [{ email }, { companyregid }] });
+        const { email, ...profileData } = req.body;
+        let companyProfile = await CompanyProfile.findOne({ email });
 
         if (companyProfile) {
             // Update existing profile
             companyProfile = await CompanyProfile.findOneAndUpdate(
-                { $or: [{ email }, { companyregid }] },
-                req.body,
+                { email },
+                { ...profileData, email },
                 { new: true, runValidators: true }
             );
         } else {
             // Create new profile
-            companyProfile = new CompanyProfile(req.body);
+            companyProfile = new CompanyProfile({ ...profileData, email });
             await companyProfile.save();
         }
 
@@ -272,13 +280,12 @@ routes.post('/companyprofile', async (req, res) => {
         res.status(400).json({ message: error.message });
     }
 });
+
 // GET Company Profile
-routes.get('/companyprofile/:identifier', async (req, res) => {
+routes.get('/companyprofile/:email', async (req, res) => {
     try {
-        const { identifier } = req.params;
-        const companyProfile = await CompanyProfile.findOne({
-            $or: [{ email: identifier }, { companyregid: identifier }]
-        });
+        const { email } = req.params;
+        const companyProfile = await CompanyProfile.findOne({ email });
 
         if (!companyProfile) {
             return res.status(404).json({ message: 'Company profile not found' });
@@ -288,6 +295,43 @@ routes.get('/companyprofile/:identifier', async (req, res) => {
     } catch (error) {
         console.error('Error in /companyprofile GET route:', error);
         res.status(500).json({ message: 'Error fetching company profile', error: error.message });
+    }
+});
+routes.get('/test-toucan-price', async (req, res) => {
+    try {
+        const price = await getTCO2Price();
+        res.json({ message: 'Toucan TCO2 price fetched successfully', price });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch Toucan price', message: error.message });
+    }
+});
+
+
+routes.get('/calculate-usdc', async (req, res) => {
+    const { creditPoints } = req.query;
+
+
+    if (!creditPoints || isNaN(creditPoints)) {
+        return res.status(400).json({ error: 'Invalid credit points' });
+    }
+
+    try {
+
+        const toucanPrice = await getTCO2Price();
+        if (!toucanPrice || isNaN(toucanPrice)) {
+            return res.status(500).json({ error: 'Failed to fetch Toucan price' });
+        }
+
+
+        const usdcAmount = parseFloat(creditPoints) * parseFloat(toucanPrice);
+
+
+        const formattedAmount = usdcAmount.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+
+
+        res.json({ usdcAmount: formattedAmount, creditPoints, toucanPrice });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to calculate USDC amount', message: error.message });
     }
 });
 module.exports = routes;

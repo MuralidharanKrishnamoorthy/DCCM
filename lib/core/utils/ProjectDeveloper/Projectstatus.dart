@@ -56,7 +56,7 @@ class _ProjectStatusState extends State<ProjectStatus>
   bool _isLoading = true;
   String? _deviceId;
   final AuthRepository authRepository =
-      AuthRepository(baseUrl: 'http://192.168.1.6:8080/api/dccm');
+      AuthRepository(baseUrl: 'http://192.168.122.19:8080/api/dccm');
 
   @override
   void initState() {

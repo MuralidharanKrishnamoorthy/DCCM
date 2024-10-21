@@ -230,7 +230,7 @@ class _ProjectDetailsUploadState extends State<ProjectDetailsUpload> {
     try {
       final request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://192.168.1.6:8080/api/dccm/projectdetail'),
+        Uri.parse('http://192.168.122.19:8080/api/dccm/projectdetail'),
       );
 
       request.fields['landSize'] = _landSizeController.text;
